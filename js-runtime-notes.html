@@ -1,0 +1,3769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JavaScript Runtime & Execution — Complete Notes</title>
+  <meta name="description" content="Comprehensive notes on JavaScript Runtime architecture, V8 engine, execution contexts, event loop, memory management, and asynchronous execution." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN SYSTEM — CSS VARIABLES
+    ============================================================ */
+    :root {
+      --bg-base:        #0a0d14;
+      --bg-surface:     #111520;
+      --bg-card:        #161c2d;
+      --bg-card-hover:  #1c2440;
+      --bg-code:        #0d1117;
+      --bg-inline:      #1e2a3a;
+
+      --accent-primary: #7c6dfa;
+      --accent-blue:    #4f9cf9;
+      --accent-teal:    #2dd4bf;
+      --accent-green:   #34d399;
+      --accent-amber:   #fbbf24;
+      --accent-pink:    #f472b6;
+      --accent-orange:  #fb923c;
+      --accent-red:     #f87171;
+
+      --text-primary:   #e8eaf6;
+      --text-secondary: #9ca3c2;
+      --text-muted:     #6b7290;
+      --text-code:      #7dd3fc;
+
+      --border:         rgba(124,109,250,0.15);
+      --border-strong:  rgba(124,109,250,0.35);
+      --border-glow:    rgba(124,109,250,0.6);
+
+      --gradient-hero:  linear-gradient(135deg, #7c6dfa 0%, #4f9cf9 50%, #2dd4bf 100%);
+      --gradient-card:  linear-gradient(145deg, #161c2d 0%, #111928 100%);
+      --shadow-card:    0 4px 24px rgba(0,0,0,0.4), 0 1px 4px rgba(124,109,250,0.08);
+      --shadow-hover:   0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,109,250,0.2);
+      --shadow-glow:    0 0 30px rgba(124,109,250,0.3);
+
+      --radius-sm:  6px;
+      --radius-md:  12px;
+      --radius-lg:  20px;
+      --radius-xl:  28px;
+
+      --font-sans:  'Inter', system-ui, sans-serif;
+      --font-head:  'Outfit', system-ui, sans-serif;
+      --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+
+      --sidebar-w:  280px;
+      --toc-w:      260px;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 88px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.75;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(124,109,250,0.35); color: #fff; }
+
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: rgba(124,109,250,0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+    /* ============================================================
+       TOP NAVIGATION BAR
+    ============================================================ */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(10,13,20,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 200;
+      gap: 16px;
+    }
+
+    .topbar-brand {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .topbar-sep { width: 1px; height: 20px; background: var(--border-strong); flex-shrink: 0; }
+
+    .topbar-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      flex: 1;
+      scrollbar-width: none;
+    }
+    .topbar-pills::-webkit-scrollbar { display: none; }
+
+    .topbar-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .topbar-pill:hover, .topbar-pill.active {
+      background: rgba(124,109,250,0.15);
+      border-color: var(--border-strong);
+      color: var(--accent-primary);
+    }
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 60px;
+    }
+
+    /* ---- Sidebar TOC ---- */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      padding: 24px 16px;
+      border-right: 1px solid var(--border);
+      background: var(--bg-surface);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124,109,250,0.3) transparent;
+    }
+
+    .sidebar-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      padding-left: 8px;
+    }
+
+    .toc-group { margin-bottom: 10px; }
+    .toc-group-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      opacity: 0.7;
+      padding: 6px 8px 4px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.18s;
+      line-height: 1.3;
+      border-left: 2px solid transparent;
+    }
+    .toc-link:hover {
+      background: rgba(124,109,250,0.1);
+      color: var(--text-primary);
+      border-left-color: var(--accent-primary);
+    }
+    .toc-link.active {
+      background: rgba(124,109,250,0.15);
+      color: var(--accent-primary);
+      border-left-color: var(--accent-primary);
+      font-weight: 500;
+    }
+    .toc-num {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      min-width: 20px;
+    }
+
+    /* ---- Main Content ---- */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 48px 80px;
+      max-width: 900px;
+    }
+
+    @media (max-width: 1100px) { .sidebar { display: none; } }
+    @media (max-width: 768px)  { .main { padding: 32px 20px 60px; } }
+
+    /* ============================================================
+       HERO HEADER
+    ============================================================ */
+    .hero {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xl);
+      padding: 52px 48px;
+      margin-bottom: 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(124,109,250,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(79,156,249,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(124,109,250,0.15);
+      border: 1px solid rgba(124,109,250,0.3);
+      color: var(--accent-primary);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .hero-stat-val {
+      font-family: var(--font-head);
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-stat-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+
+    /* ============================================================
+       SECTION CARDS
+    ============================================================ */
+    .section {
+      margin-bottom: 48px;
+      scroll-margin-top: 80px;
+    }
+
+    .section-card {
+      background: var(--gradient-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .section-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .section-icon {
+      width: 38px; height: 38px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.06);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .section-body {
+      padding: 28px;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+    ============================================================ */
+    h2 {
+      font-family: var(--font-head);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin: 24px 0 10px;
+    }
+
+    h3 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 8px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.8;
+    }
+
+    strong { color: var(--text-primary); font-weight: 600; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; color: var(--accent-primary); }
+
+    /* ============================================================
+       CODE
+    ============================================================ */
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+      color: var(--accent-teal);
+      background: var(--bg-inline);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(45,212,191,0.15);
+    }
+
+    pre {
+      background: var(--bg-code);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.875rem;
+      color: #cdd6f4;
+      line-height: 1.7;
+    }
+
+    .pre-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.06);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Syntax highlight classes */
+    .kw  { color: #c678dd; }   /* keywords */
+    .fn  { color: #61afef; }   /* functions */
+    .str { color: #98c379; }   /* strings */
+    .num { color: #d19a66; }   /* numbers */
+    .cm  { color: #5c6370; font-style: italic; } /* comments */
+    .id  { color: #e06c75; }   /* identifiers */
+    .op  { color: #56b6c2; }   /* operators */
+    .pn  { color: #abb2bf; }   /* punctuation */
+    .bc  { color: #e5c07b; }   /* bytecode */
+
+    /* ============================================================
+       FLOW DIAGRAMS
+    ============================================================ */
+    .flow {
+      background: var(--bg-code);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 16px 0;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.85;
+      color: #cdd6f4;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* ============================================================
+       DEFINITION BOX
+    ============================================================ */
+    .def-box {
+      display: flex;
+      gap: 14px;
+      background: rgba(124,109,250,0.07);
+      border: 1px solid rgba(124,109,250,0.2);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin: 16px 0;
+    }
+    .def-box-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+    .def-box-content p { margin: 0; color: var(--text-secondary); line-height: 1.7; }
+    .def-box-content p strong { color: var(--text-primary); }
+
+    /* ============================================================
+       CALLOUT / ALERT BOXES
+    ============================================================ */
+    .callout {
+      display: flex;
+      gap: 12px;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-left: 3px solid;
+      font-size: 0.9rem;
+    }
+    .callout-icon { font-size: 1rem; flex-shrink: 0; }
+    .callout-body { color: var(--text-secondary); line-height: 1.65; }
+    .callout-body strong { font-weight: 600; }
+
+    .callout-note { background: rgba(79,156,249,0.08); border-color: var(--accent-blue); }
+    .callout-note .callout-icon { color: var(--accent-blue); }
+    .callout-tip  { background: rgba(52,211,153,0.08); border-color: var(--accent-green); }
+    .callout-tip .callout-icon  { color: var(--accent-green); }
+    .callout-warn { background: rgba(251,191,36,0.08); border-color: var(--accent-amber); }
+    .callout-warn .callout-icon { color: var(--accent-amber); }
+    .callout-danger { background: rgba(248,113,113,0.08); border-color: var(--accent-red); }
+    .callout-danger .callout-icon { color: var(--accent-red); }
+
+    /* ============================================================
+       TREE DIAGRAMS
+    ============================================================ */
+    .tree-wrap {
+      background: var(--bg-code);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    .tree {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.85;
+      white-space: pre;
+    }
+
+    .t-root  { color: var(--accent-primary); font-weight: 600; }
+    .t-br    { color: var(--text-muted); }
+    .t-cat   { color: var(--accent-blue); font-weight: 500; }
+    .t-item  { color: #cdd6f4; }
+    .t-kw    { color: var(--accent-teal); }
+    .t-sub   { color: var(--text-secondary); }
+
+    /* ============================================================
+       TOKEN TABLE
+    ============================================================ */
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .token-card {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      transition: all 0.2s;
+    }
+    .token-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-inline);
+      transform: translateY(-1px);
+    }
+    .token-type {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .token-examples {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .token-example {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       EXECUTION PIPELINE
+    ============================================================ */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .pipeline-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      position: relative;
+    }
+
+    .pipeline-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 36px;
+      flex-shrink: 0;
+    }
+
+    .pipeline-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 2px solid;
+      background: var(--bg-base);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pipeline-line {
+      width: 2px;
+      flex: 1;
+      min-height: 24px;
+      background: linear-gradient(to bottom, currentColor, rgba(255,255,255,0.1));
+      opacity: 0.3;
+    }
+
+    .pipeline-content {
+      flex: 1;
+      padding: 0 0 24px 8px;
+    }
+
+    .pipeline-label {
+      font-family: var(--font-head);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .pipeline-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       CALL STACK VISUAL
+    ============================================================ */
+    .stack-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: 260px;
+      margin: 16px auto;
+    }
+
+    .stack-frame {
+      padding: 11px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      font-weight: 500;
+      border: 1px solid;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .stack-frame:first-child {
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+    .stack-frame:last-child {
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    }
+
+    .stack-frame.top {
+      background: rgba(124,109,250,0.2);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    .stack-frame.mid {
+      background: rgba(79,156,249,0.1);
+      border-color: rgba(79,156,249,0.3);
+      color: var(--accent-blue);
+    }
+    .stack-frame.global {
+      background: rgba(52,211,153,0.08);
+      border-color: rgba(52,211,153,0.25);
+      color: var(--accent-green);
+    }
+
+    .stack-arrow {
+      text-align: right;
+      padding-right: 8px;
+      font-size: 0.7rem;
+      color: var(--accent-primary);
+      margin-bottom: -1px;
+      font-weight: 700;
+    }
+
+    /* ============================================================
+       COMPARISON TABLE
+    ============================================================ */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.875rem;
+    }
+    .compare-table th {
+      background: rgba(124,109,250,0.12);
+      color: var(--accent-primary);
+      font-weight: 600;
+      padding: 10px 16px;
+      text-align: left;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+    .compare-table td {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .compare-table tr:hover td { background: rgba(124,109,250,0.05); }
+
+    /* ============================================================
+       BADGE PILLS
+    ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge-purple { background: rgba(124,109,250,0.2); color: var(--accent-primary); border: 1px solid rgba(124,109,250,0.3); }
+    .badge-blue   { background: rgba(79,156,249,0.2);  color: var(--accent-blue);    border: 1px solid rgba(79,156,249,0.3); }
+    .badge-teal   { background: rgba(45,212,191,0.15); color: var(--accent-teal);    border: 1px solid rgba(45,212,191,0.3); }
+    .badge-green  { background: rgba(52,211,153,0.15); color: var(--accent-green);   border: 1px solid rgba(52,211,153,0.3); }
+    .badge-amber  { background: rgba(251,191,36,0.15); color: var(--accent-amber);   border: 1px solid rgba(251,191,36,0.3); }
+    .badge-red    { background: rgba(248,113,113,0.15); color: var(--accent-red);    border: 1px solid rgba(248,113,113,0.3); }
+    .badge-orange { background: rgba(251,146,60,0.15); color: var(--accent-orange);  border: 1px solid rgba(251,146,60,0.3); }
+
+    /* ============================================================
+       ENGINE CARDS
+    ============================================================ */
+    .engine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .engine-card {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      transition: all 0.2s;
+    }
+    .engine-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .engine-name {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .engine-uses {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .engine-use {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .engine-use::before {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    /* ============================================================
+       API CATEGORY CARDS
+    ============================================================ */
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .api-card {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    .api-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .api-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .api-card-icon { font-size: 1.1rem; }
+    .api-card-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    .api-card-items {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .api-card-item {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .api-card-item:last-child { border-bottom: none; }
+
+    /* ============================================================
+       QUEUE VISUALIZATION
+    ============================================================ */
+    .queue-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .queue-section {
+      background: var(--bg-code);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .queue-label {
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .queue-items {
+      display: flex;
+      gap: 0;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .queue-item {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    /* ============================================================
+       EVENT LOOP DIAGRAM
+    ============================================================ */
+    .event-loop-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: start;
+      margin: 20px 0;
+    }
+
+    .el-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .el-box-title {
+      font-family: var(--font-head);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .el-box-items { display: flex; flex-direction: column; gap: 4px; }
+    .el-box-item {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.03);
+    }
+    .el-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 8px;
+    }
+    .el-loop-badge {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.2;
+      background: rgba(124,109,250,0.2);
+      border: 2px solid var(--accent-primary);
+      color: var(--accent-primary);
+      animation: pulse-loop 3s ease-in-out infinite;
+    }
+    @keyframes pulse-loop {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(124,109,250,0.4); }
+      50%       { box-shadow: 0 0 0 10px rgba(124,109,250,0); }
+    }
+
+    /* ============================================================
+       SECTION DIVIDER
+    ============================================================ */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    /* ============================================================
+       SUMMARY CARD
+    ============================================================ */
+    .summary-card {
+      background: linear-gradient(135deg, rgba(124,109,250,0.1) 0%, rgba(79,156,249,0.05) 100%);
+      border: 1px solid rgba(124,109,250,0.25);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-top: 20px;
+    }
+    .summary-card p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--text-secondary);
+    }
+    .summary-card strong { color: var(--accent-primary); }
+
+    /* ============================================================
+       TDZ TIMELINE
+    ============================================================ */
+    .tdz-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 16px 0;
+      position: relative;
+      padding-left: 24px;
+    }
+    .tdz-timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-blue), var(--accent-red), var(--accent-green));
+    }
+    .tdz-step {
+      position: relative;
+      padding: 8px 0 8px 20px;
+    }
+    .tdz-step::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 14px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .tdz-step.phase-start::before { border-color: var(--accent-blue); background: rgba(79,156,249,0.3); }
+    .tdz-step.phase-tdz::before   { border-color: var(--accent-red); background: rgba(248,113,113,0.3); }
+    .tdz-step.phase-ok::before    { border-color: var(--accent-green); background: rgba(52,211,153,0.3); }
+    .tdz-step-label { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
+    .tdz-step-desc  { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* ============================================================
+       WHAT'S NEXT
+    ============================================================ */
+    .next-card {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-top: 48px;
+    }
+    .next-title {
+      font-family: var(--font-head);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .next-topics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .next-topic {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .next-topic:hover {
+      background: rgba(124,109,250,0.1);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .next-topic-icon { font-size: 1.3rem; margin-bottom: 6px; }
+    .next-topic-title { font-weight: 600; font-size: 0.88rem; color: var(--text-primary); }
+    .next-topic-desc  { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ============================================================
+       BACK TO TOP
+    ============================================================ */
+    .back-to-top {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(124,109,250,0.5);
+      transition: all 0.2s;
+      z-index: 100;
+    }
+    .back-to-top:hover {
+      background: #6b5de0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124,109,250,0.6);
+    }
+
+    /* ============================================================
+       PROGRESS BAR
+    ============================================================ */
+    .progress-bar {
+      position: fixed;
+      top: 60px; left: 0;
+      height: 2px;
+      background: var(--gradient-hero);
+      z-index: 199;
+      transition: width 0.1s;
+      width: 0%;
+    }
+
+    /* ============================================================
+       HIGHLIGHT ROWS
+    ============================================================ */
+    .highlight-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,0.06);
+      margin: 6px 0;
+    }
+    .highlight-row-icon { font-size: 1rem; flex-shrink: 0; }
+    .highlight-row-text { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.55; }
+    .highlight-row-text strong { color: var(--text-primary); }
+
+    /* ============================================================
+       INLINE FLOW ARROW
+    ============================================================ */
+    .iflow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .iflow-step {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: var(--bg-inline);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .iflow-arrow { color: var(--accent-primary); font-size: 0.9rem; }
+
+    /* ============================================================
+       SECTION COLOR SCHEMES
+    ============================================================ */
+    .color-purple .section-icon { background: rgba(124,109,250,0.2); color: var(--accent-primary); }
+    .color-blue   .section-icon { background: rgba(79,156,249,0.2);  color: var(--accent-blue); }
+    .color-teal   .section-icon { background: rgba(45,212,191,0.15); color: var(--accent-teal); }
+    .color-green  .section-icon { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+    .color-amber  .section-icon { background: rgba(251,191,36,0.15); color: var(--accent-amber); }
+    .color-pink   .section-icon { background: rgba(244,114,182,0.15); color: var(--accent-pink); }
+    .color-orange .section-icon { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
+    .color-red    .section-icon { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+
+    .color-purple .section-header { border-bottom-color: rgba(124,109,250,0.15); }
+    .color-blue   .section-header { border-bottom-color: rgba(79,156,249,0.15); }
+    .color-teal   .section-header { border-bottom-color: rgba(45,212,191,0.1); }
+    .color-green  .section-header { border-bottom-color: rgba(52,211,153,0.1); }
+    .color-amber  .section-header { border-bottom-color: rgba(251,191,36,0.1); }
+    .color-orange .section-header { border-bottom-color: rgba(251,146,60,0.1); }
+    .color-red    .section-header { border-bottom-color: rgba(248,113,113,0.1); }
+
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Top Navigation -->
+<nav class="topbar" id="top">
+  <div class="topbar-brand">⚡ JS Runtime Notes</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-pills">
+    <a href="#s1"  class="topbar-pill">🌐 What is JS</a>
+    <a href="#s2"  class="topbar-pill">🏗 Runtime</a>
+    <a href="#s3"  class="topbar-pill">⚙️ Engine</a>
+    <a href="#s5"  class="topbar-pill">🔄 Exec Flow</a>
+    <a href="#s7"  class="topbar-pill">🔤 Lexical</a>
+    <a href="#s8"  class="topbar-pill">🌲 AST</a>
+    <a href="#s12" class="topbar-pill">📦 Exec Context</a>
+    <a href="#s20" class="topbar-pill">📚 Call Stack</a>
+    <a href="#s22" class="topbar-pill">💾 Memory</a>
+    <a href="#s26" class="topbar-pill">🚀 JIT</a>
+    <a href="#s28" class="topbar-pill">🌍 APIs</a>
+    <a href="#s41" class="topbar-pill">⏱ Async</a>
+    <a href="#s44" class="topbar-pill">🔁 Event Loop</a>
+    <a href="#s47" class="topbar-pill">🗺 Hierarchy</a>
+  </div>
+</nav>
+
+<!-- Layout -->
+<div class="layout">
+
+  <!-- Sidebar TOC -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Table of Contents</div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Foundations</div>
+      <a href="#s1"  class="toc-link"><span class="toc-num">01</span>What is JavaScript?</a>
+      <a href="#s2"  class="toc-link"><span class="toc-num">02</span>JavaScript Runtime</a>
+      <a href="#s3"  class="toc-link"><span class="toc-num">03</span>JavaScript Engine</a>
+      <a href="#s4"  class="toc-link"><span class="toc-num">04</span>V8 Architecture</a>
+      <a href="#s5"  class="toc-link"><span class="toc-num">05</span>Execution Flow</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Processing Pipeline</div>
+      <a href="#s6"  class="toc-link"><span class="toc-num">06</span>Source Code</a>
+      <a href="#s7"  class="toc-link"><span class="toc-num">07</span>Lexical Analysis</a>
+      <a href="#s8"  class="toc-link"><span class="toc-num">08</span>Parsing</a>
+      <a href="#s9"  class="toc-link"><span class="toc-num">09</span>Abstract Syntax Tree</a>
+      <a href="#s10" class="toc-link"><span class="toc-num">10</span>Interpreter / Ignition</a>
+      <a href="#s11" class="toc-link"><span class="toc-num">11</span>Bytecode</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Execution Context</div>
+      <a href="#s12" class="toc-link"><span class="toc-num">12</span>Execution Context</a>
+      <a href="#s13" class="toc-link"><span class="toc-num">13</span>Types of EC</a>
+      <a href="#s14" class="toc-link"><span class="toc-num">14</span>Global EC</a>
+      <a href="#s15" class="toc-link"><span class="toc-num">15</span>Creation Phase</a>
+      <a href="#s16" class="toc-link"><span class="toc-num">16</span>Temporal Dead Zone</a>
+      <a href="#s17" class="toc-link"><span class="toc-num">17</span>Function Hoisting</a>
+      <a href="#s18" class="toc-link"><span class="toc-num">18</span>Execution Phase</a>
+      <a href="#s19" class="toc-link"><span class="toc-num">19</span>Function EC</a>
+      <a href="#s20" class="toc-link"><span class="toc-num">20</span>Call Stack</a>
+      <a href="#s21" class="toc-link"><span class="toc-num">21</span>Complete EC Flow</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Memory &amp; Optimization</div>
+      <a href="#s22" class="toc-link"><span class="toc-num">22</span>Memory Heap</a>
+      <a href="#s23" class="toc-link"><span class="toc-num">23</span>Garbage Collection</a>
+      <a href="#s24" class="toc-link"><span class="toc-num">24</span>Runtime Feedback</a>
+      <a href="#s25" class="toc-link"><span class="toc-num">25</span>Hot Code</a>
+      <a href="#s26" class="toc-link"><span class="toc-num">26</span>JIT Compilation</a>
+      <a href="#s27" class="toc-link"><span class="toc-num">27</span>Machine Code</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Environment APIs</div>
+      <a href="#s28" class="toc-link"><span class="toc-num">28</span>Environment APIs</a>
+      <a href="#s29" class="toc-link"><span class="toc-num">29</span>Browser Runtime</a>
+      <a href="#s30" class="toc-link"><span class="toc-num">30</span>DOM APIs</a>
+      <a href="#s31" class="toc-link"><span class="toc-num">31</span>Timer APIs</a>
+      <a href="#s32" class="toc-link"><span class="toc-num">32</span>Network APIs</a>
+      <a href="#s33" class="toc-link"><span class="toc-num">33</span>Event APIs</a>
+      <a href="#s34" class="toc-link"><span class="toc-num">34</span>Storage APIs</a>
+      <a href="#s35" class="toc-link"><span class="toc-num">35</span>Device &amp; Location</a>
+      <a href="#s36" class="toc-link"><span class="toc-num">36</span>Web Workers</a>
+      <a href="#s37" class="toc-link"><span class="toc-num">37</span>Node.js Runtime</a>
+      <a href="#s38" class="toc-link"><span class="toc-num">38</span>Node.js APIs</a>
+      <a href="#s39" class="toc-link"><span class="toc-num">39</span>Streams</a>
+      <a href="#s40" class="toc-link"><span class="toc-num">40</span>Other Node APIs</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Async &amp; Event Loop</div>
+      <a href="#s41" class="toc-link"><span class="toc-num">41</span>Sync vs Async</a>
+      <a href="#s42" class="toc-link"><span class="toc-num">42</span>Microtask Queue</a>
+      <a href="#s43" class="toc-link"><span class="toc-num">43</span>Task Queue</a>
+      <a href="#s44" class="toc-link"><span class="toc-num">44</span>Event Loop</a>
+      <a href="#s45" class="toc-link"><span class="toc-num">45</span>Priority Model</a>
+      <a href="#s46" class="toc-link"><span class="toc-num">46</span>Async Exec Flow</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-group-label">Summary</div>
+      <a href="#s47" class="toc-link"><span class="toc-num">47</span>Runtime Hierarchy</a>
+      <a href="#s48" class="toc-link"><span class="toc-num">48</span>Mental Model</a>
+      <a href="#next" class="toc-link"><span class="toc-num">→</span>What's Next</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ==================== HERO ==================== -->
+    <div class="hero">
+      <div class="hero-badge">📖 Complete Reference Notes</div>
+      <h1>JavaScript Runtime &amp; Execution</h1>
+      <p class="hero-desc">
+        A deep-dive into how JavaScript code travels from source text to CPU instructions —
+        covering the V8 engine, execution contexts, memory management, environment APIs,
+        and the asynchronous event loop model.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val">48</div>
+          <div class="hero-stat-label">Sections</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">V8</div>
+          <div class="hero-stat-label">Engine Focus</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">4</div>
+          <div class="hero-stat-label">Core Components</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">∞</div>
+          <div class="hero-stat-label">Event Loop</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 1 ==================== -->
+    <section class="section" id="s1">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">🌐</div>
+          <div class="section-num">01</div>
+          <div class="section-title">What is JavaScript?</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">💡</div>
+            <div class="def-box-content">
+              <p>JavaScript is a <strong>high-level, dynamically typed programming language</strong> used to create interactive and dynamic applications. It runs in browsers, on servers (Node.js), and increasingly in many other environments.</p>
+            </div>
+          </div>
+
+          <p>JavaScript code does <strong>not directly communicate with the CPU</strong> in its original source-code form. It must be processed before a computer can execute it.</p>
+
+          <div class="pre-label">📄 JavaScript Source Code</div>
+          <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span>
+<span class="kw">let</span> <span class="id">b</span> <span class="op">=</span> <span class="num">20</span><span class="pn">;</span>
+
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">a</span> <span class="op">+</span> <span class="id">b</span><span class="pn">);</span>  <span class="cm">// → 30</span></code></pre>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-body">
+              This code <em>must go through the JavaScript runtime and engine</em> before it can execute. The engine reads the text, understands its structure, compiles it to bytecode, and finally runs it.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 2 ==================== -->
+    <section class="section" id="s2">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🏗</div>
+          <div class="section-num">02</div>
+          <div class="section-title">What is a JavaScript Runtime?</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>A <strong>JavaScript Runtime</strong> is the <em>complete environment</em> required to execute JavaScript code. It is more than just the engine — it includes all the surrounding infrastructure that makes JS useful in a real environment.</p>
+            </div>
+          </div>
+
+          <h2>Four Core Components</h2>
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-root">JAVASCRIPT RUNTIME</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">JavaScript Engine</span>
+<span class="t-br">│   ├──</span> <span class="t-item">Processes JavaScript source code</span>
+<span class="t-br">│   ├──</span> <span class="t-item">Executes JavaScript</span>
+<span class="t-br">│   ├──</span> <span class="t-item">Manages memory</span>
+<span class="t-br">│   └──</span> <span class="t-item">Optimizes code (JIT)</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Environment APIs</span>
+<span class="t-br">│   ├──</span> <span class="t-item">Browser APIs (DOM, fetch, timers…)</span>
+<span class="t-br">│   └──</span> <span class="t-item">Node.js APIs (fs, http, net…)</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Queues</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Microtask Queue</span> <span class="t-sub">(Promises, queueMicrotask)</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Task Queue</span>      <span class="t-sub">(Timers, Events)</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-cat">Event Loop</span>
+    <span class="t-br">└──</span> <span class="t-item">Coordinates asynchronous execution</span></div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">
+              <strong>Key Insight:</strong> The runtime handles both synchronous code (via the engine) <em>and</em> asynchronous operations (via APIs + queues + event loop). Neither part alone is sufficient.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 3 ==================== -->
+    <section class="section" id="s3">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">⚙️</div>
+          <div class="section-num">03</div>
+          <div class="section-title">JavaScript Engine</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>A <strong>JavaScript Engine</strong> is software responsible for <em>processing and executing</em> JavaScript code. It takes JavaScript source code and converts it into instructions that can ultimately run on the computer.</p>
+            </div>
+          </div>
+
+          <h2>Famous JavaScript Engines</h2>
+          <div class="engine-grid">
+            <div class="engine-card">
+              <div class="engine-name"><span class="badge badge-purple">V8</span></div>
+              <div class="engine-uses">
+                <div class="engine-use">Google Chrome</div>
+                <div class="engine-use">Microsoft Edge</div>
+                <div class="engine-use">Node.js</div>
+                <div class="engine-use">Deno</div>
+              </div>
+            </div>
+            <div class="engine-card">
+              <div class="engine-name"><span class="badge badge-orange">SpiderMonkey</span></div>
+              <div class="engine-uses">
+                <div class="engine-use">Mozilla Firefox</div>
+              </div>
+            </div>
+            <div class="engine-card">
+              <div class="engine-name"><span class="badge badge-blue">JavaScriptCore</span></div>
+              <div class="engine-uses">
+                <div class="engine-use">Apple Safari</div>
+                <div class="engine-use">Bun (runtime)</div>
+              </div>
+            </div>
+            <div class="engine-card">
+              <div class="engine-name"><span class="badge badge-teal">Chakra</span></div>
+              <div class="engine-uses">
+                <div class="engine-use">Legacy Microsoft Edge</div>
+                <div class="engine-use">(Deprecated)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">📌</span>
+            <div class="callout-body">These notes primarily use <strong>V8</strong> as the reference engine since it powers Chrome, Edge, and Node.js — the most widely used JavaScript environments.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 4 ==================== -->
+    <section class="section" id="s4">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">🔧</div>
+          <div class="section-num">04</div>
+          <div class="section-title">V8 Engine Architecture</div>
+        </div>
+        <div class="section-body">
+          <p>V8 is Google's open-source, high-performance JavaScript engine written in C++. It has five major subsystems:</p>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-root">V8 JAVASCRIPT ENGINE</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Code Processing</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Lexical Analysis</span>  <span class="t-sub">→ Tokens</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Parsing</span>           <span class="t-sub">→ Grammar / Syntax</span>
+<span class="t-br">│   └──</span> <span class="t-kw">AST</span>               <span class="t-sub">→ Abstract Syntax Tree</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Code Execution</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Ignition</span>          <span class="t-sub">→ Interpreter</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Bytecode Execution</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Optimization</span>
+<span class="t-br">│   └──</span> <span class="t-kw">TurboFan</span>          <span class="t-sub">→ Optimizing Compiler (JIT)</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Execution Management</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Execution Context</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Call Stack</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-cat">Memory Management</span>
+    <span class="t-br">├──</span> <span class="t-kw">Memory Heap</span>
+    <span class="t-br">└──</span> <span class="t-kw">Garbage Collector</span>    <span class="t-sub">(Mark-and-Sweep)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 5 ==================== -->
+    <section class="section" id="s5">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">🔄</div>
+          <div class="section-num">05</div>
+          <div class="section-title">Complete JavaScript Code Execution Flow</div>
+        </div>
+        <div class="section-body">
+          <p>Every piece of JavaScript code takes this journey from source text to CPU execution:</p>
+
+          <div class="pipeline">
+            <div class="pipeline-step">
+              <div class="pipeline-connector" style="color: var(--accent-purple)">
+                <div class="pipeline-dot" style="border-color: var(--accent-primary); background: rgba(124,109,250,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-primary)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-primary)">① JavaScript Source Code</div>
+                <div class="pipeline-desc">The code written by the developer — human-readable text</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-blue); background: rgba(79,156,249,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-blue)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-blue)">② Lexical Analysis → Tokens</div>
+                <div class="pipeline-desc">The Lexer/Tokenizer breaks code into meaningful units: keywords, identifiers, operators, literals</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-teal); background: rgba(45,212,191,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-teal)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-teal)">③ Parsing → Abstract Syntax Tree</div>
+                <div class="pipeline-desc">The Parser validates grammar and builds a hierarchical tree structure representing the code</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-green); background: rgba(52,211,153,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-green)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-green)">④ Ignition Interpreter → Bytecode</div>
+                <div class="pipeline-desc">Ignition traverses the AST and generates platform-neutral bytecode, then executes it</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-amber); background: rgba(251,191,36,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-amber)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-amber)">⑤ Execution Context + Call Stack</div>
+                <div class="pipeline-desc">Each invocation creates an Execution Context pushed onto the Call Stack</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-orange); background: rgba(251,146,60,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-orange)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-orange)">⑥ Runtime Feedback → Hot Code Detection</div>
+                <div class="pipeline-desc">The engine profiles execution — counting how often code paths run</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-pink); background: rgba(244,114,182,0.3)"></div>
+                <div class="pipeline-line" style="background: var(--accent-pink)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-pink)">⑦ JIT Optimization → TurboFan</div>
+                <div class="pipeline-desc">Frequently executed ("hot") code is compiled by TurboFan into optimized machine code</div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color: var(--accent-red); background: rgba(248,113,113,0.3)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color: var(--accent-red)">⑧ Optimized Machine Code → CPU</div>
+                <div class="pipeline-desc">The CPU executes native machine code directly — maximum performance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 6 ==================== -->
+    <section class="section" id="s6">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">📄</div>
+          <div class="section-num">06</div>
+          <div class="section-title">Step 1 — JavaScript Source Code</div>
+        </div>
+        <div class="section-body">
+          <p>Source code is the code written by the developer. It is plain text that follows the JavaScript grammar specification.</p>
+
+          <div class="pre-label">📄 Example Source Code</div>
+          <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span>
+<span class="kw">let</span> <span class="id">b</span> <span class="op">=</span> <span class="num">20</span><span class="pn">;</span>
+
+<span class="kw">function</span> <span class="fn">add</span><span class="pn">(</span><span class="id">x</span><span class="pn">,</span> <span class="id">y</span><span class="pn">) {</span>
+    <span class="kw">return</span> <span class="id">x</span> <span class="op">+</span> <span class="id">y</span><span class="pn">;</span>
+<span class="pn">}</span>
+
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="fn">add</span><span class="pn">(</span><span class="id">a</span><span class="pn">,</span> <span class="id">b</span><span class="pn">));</span>  <span class="cm">// → 30</span></code></pre>
+
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-body">The JavaScript engine <strong>cannot simply treat the source code as random text</strong>. It must first understand its structure through lexical analysis and parsing.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 7 ==================== -->
+    <section class="section" id="s7">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🔤</div>
+          <div class="section-num">07</div>
+          <div class="section-title">Step 2 — Lexical Analysis</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Lexical Analysis</strong> is the process of reading JavaScript source code and breaking it into small meaningful units called <strong>tokens</strong>. The component performing this work is called the <strong>Lexer</strong> or <strong>Tokenizer</strong>.</p>
+            </div>
+          </div>
+
+          <h2>Tokenization Example</h2>
+          <div class="pre-label">Input</div>
+          <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span></code></pre>
+
+          <p>The lexer identifies each meaningful unit:</p>
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-br">┌─────────────┬────────────┐</span>
+<span class="t-br">│</span> <span class="t-cat">Token Type  </span> <span class="t-br">│</span> <span class="t-item">Value      </span> <span class="t-br">│</span>
+<span class="t-br">├─────────────┼────────────┤</span>
+<span class="t-br">│</span> <span class="t-kw">Keyword     </span> <span class="t-br">│</span> <span class="t-item">let        </span> <span class="t-br">│</span>
+<span class="t-br">│</span> <span class="t-kw">Identifier  </span> <span class="t-br">│</span> <span class="t-item">a          </span> <span class="t-br">│</span>
+<span class="t-br">│</span> <span class="t-kw">Operator    </span> <span class="t-br">│</span> <span class="t-item">=          </span> <span class="t-br">│</span>
+<span class="t-br">│</span> <span class="t-kw">Literal     </span> <span class="t-br">│</span> <span class="t-item">10         </span> <span class="t-br">│</span>
+<span class="t-br">│</span> <span class="t-kw">Punctuation </span> <span class="t-br">│</span> <span class="t-item">;          </span> <span class="t-br">│</span>
+<span class="t-br">└─────────────┴────────────┘</span></div>
+          </div>
+
+          <h2>Common Token Types</h2>
+          <div class="token-grid">
+            <div class="token-card">
+              <div class="token-type" style="color: var(--accent-primary)">Keywords</div>
+              <div class="token-examples">
+                <span class="token-example">let</span>
+                <span class="token-example">const</span>
+                <span class="token-example">var</span>
+                <span class="token-example">function</span>
+                <span class="token-example">return</span>
+                <span class="token-example">if / else</span>
+              </div>
+            </div>
+            <div class="token-card">
+              <div class="token-type" style="color: var(--accent-blue)">Identifiers</div>
+              <div class="token-examples">
+                <span class="token-example">a</span>
+                <span class="token-example">user</span>
+                <span class="token-example">myFunction</span>
+                <span class="token-example">calculateTotal</span>
+              </div>
+            </div>
+            <div class="token-card">
+              <div class="token-type" style="color: var(--accent-teal)">Literals</div>
+              <div class="token-examples">
+                <span class="token-example">10  (Number)</span>
+                <span class="token-example">"hello"  (String)</span>
+                <span class="token-example">true / false</span>
+                <span class="token-example">null</span>
+              </div>
+            </div>
+            <div class="token-card">
+              <div class="token-type" style="color: var(--accent-amber)">Operators</div>
+              <div class="token-examples">
+                <span class="token-example">+  -  *  /</span>
+                <span class="token-example">=  ===  !==</span>
+                <span class="token-example">&&  ||  !</span>
+                <span class="token-example">typeof</span>
+              </div>
+            </div>
+            <div class="token-card">
+              <div class="token-type" style="color: var(--accent-orange)">Punctuation</div>
+              <div class="token-examples">
+                <span class="token-example">;  ,  .</span>
+                <span class="token-example">( )  { }  [ ]</span>
+                <span class="token-example">: ?</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-body">Whitespace and comments are generally <strong>discarded</strong> during lexical analysis — they help humans read code, but the engine doesn't need them after tokenization.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 8 ==================== -->
+    <section class="section" id="s8">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🌲</div>
+          <div class="section-num">08</div>
+          <div class="section-title">Step 3 — Parsing</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Parsing</strong> is the process of analyzing tokens according to JavaScript grammar and determining their structural relationship. The component responsible is called the <strong>Parser</strong>. Its output is an <strong>Abstract Syntax Tree (AST)</strong>.</p>
+            </div>
+          </div>
+
+          <div class="iflow">
+            <div class="iflow-step">Tokens</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Parser</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Checks Grammar</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Checks Syntax</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">AST</div>
+          </div>
+
+          <h2>Valid vs Invalid Syntax</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;">
+            <div>
+              <div class="pre-label" style="color: var(--accent-green)">✅ Valid — Parser succeeds</div>
+              <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span></code></pre>
+            </div>
+            <div>
+              <div class="pre-label" style="color: var(--accent-red)">❌ Invalid — SyntaxError</div>
+              <pre><code><span class="kw">let</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span>  <span class="cm">// missing identifier</span></code></pre>
+            </div>
+          </div>
+
+          <div class="callout callout-danger">
+            <span class="callout-icon">🚨</span>
+            <div class="callout-body">If the token stream violates JavaScript's grammar rules, the parser throws a <strong>SyntaxError</strong> and execution halts. This happens before any code runs.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 9 ==================== -->
+    <section class="section" id="s9">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">🌳</div>
+          <div class="section-num">09</div>
+          <div class="section-title">Abstract Syntax Tree (AST)</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>An <strong>Abstract Syntax Tree (AST)</strong> is a tree-like data structure representing the hierarchical logical structure of JavaScript code. It strips away formatting details (whitespace, comments) and captures only the <em>meaning</em>.</p>
+            </div>
+          </div>
+
+          <h2>AST Example 1 — Variable Declaration</h2>
+          <div class="pre-label">Source</div>
+          <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span></code></pre>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">VariableDeclaration</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">kind</span>         <span class="t-sub">→ "let"</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-kw">declarations</span>
+    <span class="t-br">└──</span> <span class="t-cat">VariableDeclarator</span>
+        <span class="t-br">│</span>
+        <span class="t-br">├──</span> <span class="t-kw">id</span>   → <span class="t-cat">Identifier</span> <span class="t-sub">{ name: "a" }</span>
+        <span class="t-br">└──</span> <span class="t-kw">init</span> → <span class="t-cat">Literal</span>    <span class="t-sub">{ value: 10 }</span></div>
+          </div>
+
+          <h2>AST Example 2 — Function Declaration</h2>
+          <div class="pre-label">Source</div>
+          <pre><code><span class="kw">function</span> <span class="fn">add</span><span class="pn">(</span><span class="id">a</span><span class="pn">,</span> <span class="id">b</span><span class="pn">) {</span>
+    <span class="kw">return</span> <span class="id">a</span> <span class="op">+</span> <span class="id">b</span><span class="pn">;</span>
+<span class="pn">}</span></code></pre>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">FunctionDeclaration</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">name</span>       → <span class="t-cat">Identifier</span> <span class="t-sub">{ name: "add" }</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">params</span>     → <span class="t-sub">[ Identifier "a", Identifier "b" ]</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-kw">body</span>
+    <span class="t-br">└──</span> <span class="t-cat">BlockStatement</span>
+        <span class="t-br">└──</span> <span class="t-cat">ReturnStatement</span>
+            <span class="t-br">└──</span> <span class="t-cat">BinaryExpression</span>
+                <span class="t-br">├──</span> <span class="t-kw">left</span>     → <span class="t-item">Identifier "a"</span>
+                <span class="t-br">├──</span> <span class="t-kw">operator</span> → <span class="t-item">"+"</span>
+                <span class="t-br">└──</span> <span class="t-kw">right</span>    → <span class="t-item">Identifier "b"</span></div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">You can inspect the AST of any JavaScript snippet at <strong>astexplorer.net</strong>. Tools like Babel, ESLint, and TypeScript all operate on ASTs.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 10 ==================== -->
+    <section class="section" id="s10">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">🔥</div>
+          <div class="section-num">10</div>
+          <div class="section-title">Step 4 — Interpreter (Ignition)</div>
+        </div>
+        <div class="section-body">
+          <p>After the AST is built, V8's interpreter <strong>Ignition</strong> takes over. Ignition was introduced in V8 2017 to replace a more complex pipeline.</p>
+
+          <div class="iflow">
+            <div class="iflow-step">AST</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Ignition</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Generates Bytecode</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Executes Bytecode</div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">⚡</span>
+            <div class="callout-body">
+              <strong>Why not compile directly to machine code?</strong> Bytecode starts executing faster (no long compilation step), uses less memory, and the profiling data collected during bytecode execution guides better JIT optimizations later.
+            </div>
+          </div>
+
+          <h2>Ignition Responsibilities</h2>
+          <div class="highlight-row">
+            <div class="highlight-row-icon">📖</div>
+            <div class="highlight-row-text"><strong>Traverses the AST</strong> and generates a sequence of bytecode instructions</div>
+          </div>
+          <div class="highlight-row">
+            <div class="highlight-row-icon">▶️</div>
+            <div class="highlight-row-text"><strong>Executes bytecode</strong> using a register-based virtual machine</div>
+          </div>
+          <div class="highlight-row">
+            <div class="highlight-row-icon">📊</div>
+            <div class="highlight-row-text"><strong>Collects runtime feedback</strong> (type information, execution counts) passed to TurboFan</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 11 ==================== -->
+    <section class="section" id="s11">
+      <div class="section-card color-pink">
+        <div class="section-header">
+          <div class="section-icon">📝</div>
+          <div class="section-num">11</div>
+          <div class="section-title">Bytecode</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Bytecode</strong> is an <em>intermediate representation</em> used internally by the JavaScript engine. It is neither the original source code nor final CPU machine code — it lives between these two levels.</p>
+            </div>
+          </div>
+
+          <div class="iflow">
+            <div class="iflow-step">Source Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">AST</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-pink); border-color: rgba(244,114,182,0.4)">Bytecode</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Machine Code</div>
+          </div>
+
+          <h2>Conceptual Bytecode Examples</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <div class="pre-label">Source</div>
+              <pre><code><span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span></code></pre>
+              <div class="pre-label">Conceptual Bytecode</div>
+              <pre><code><span class="bc">LoadConstant</span>  <span class="num">10</span>
+<span class="bc">Store</span>         <span class="id">a</span></code></pre>
+            </div>
+            <div>
+              <div class="pre-label">Source</div>
+              <pre><code><span class="kw">let</span> <span class="id">result</span> <span class="op">=</span> <span class="id">a</span> <span class="op">+</span> <span class="id">b</span><span class="pn">;</span></code></pre>
+              <div class="pre-label">Conceptual Bytecode</div>
+              <pre><code><span class="bc">Load</span>    <span class="id">a</span>
+<span class="bc">Load</span>    <span class="id">b</span>
+<span class="bc">Add</span>
+<span class="bc">Store</span>   <span class="id">result</span></code></pre>
+            </div>
+          </div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">📌</span>
+            <div class="callout-body">These are <em>conceptual</em> representations for understanding. Real V8 bytecode is different and not standardized for external consumption.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 12 ==================== -->
+    <section class="section" id="s12">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">📦</div>
+          <div class="section-num">12</div>
+          <div class="section-title">Execution Context</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>An <strong>Execution Context (EC)</strong> is the environment in which JavaScript code is <em>prepared</em> and <em>executed</em>. Every piece of code runs inside an execution context.</p>
+            </div>
+          </div>
+
+          <h2>What an Execution Context Contains</h2>
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">EXECUTION CONTEXT</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">Variable Environment</span>   <span class="t-sub">variable/binding records</span>
+<span class="t-br">├──</span> <span class="t-kw">Lexical Environment</span>    <span class="t-sub">scope chain info</span>
+<span class="t-br">├──</span> <span class="t-kw">Outer Environment Ref</span>  <span class="t-sub">link to parent scope</span>
+<span class="t-br">├──</span> <span class="t-kw">this Binding</span>           <span class="t-sub">value of `this`</span>
+<span class="t-br">└──</span> <span class="t-kw">Code Phase</span>             <span class="t-sub">Creation → Execution</span></div>
+          </div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">🔗</span>
+            <div class="callout-body">The concepts of <strong>Scope</strong>, <strong>Closures</strong>, <strong>Hoisting</strong>, and <strong><code>this</code></strong> all live inside the Execution Context. Understanding EC is the foundation for mastering these topics.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 13 ==================== -->
+    <section class="section" id="s13">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🗂</div>
+          <div class="section-num">13</div>
+          <div class="section-title">Types of Execution Context</div>
+        </div>
+        <div class="section-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0;">
+            <div class="api-card">
+              <div class="api-card-header">
+                <div class="api-card-icon">🌍</div>
+                <div class="api-card-title">Global EC</div>
+              </div>
+              <p style="font-size:0.82rem; color: var(--text-muted); margin:0">Created once when the program starts. There is only one Global EC.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header">
+                <div class="api-card-icon">🔧</div>
+                <div class="api-card-title">Function EC</div>
+              </div>
+              <p style="font-size:0.82rem; color: var(--text-muted); margin:0">Created each time a function is called. Can have many at once on the call stack.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header">
+                <div class="api-card-icon">⚡</div>
+                <div class="api-card-title">Eval EC</div>
+              </div>
+              <p style="font-size:0.82rem; color: var(--text-muted); margin:0">Created inside <code>eval()</code>. Rarely used; avoid in modern code.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 14 ==================== -->
+    <section class="section" id="s14">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🌍</div>
+          <div class="section-num">14</div>
+          <div class="section-title">Global Execution Context</div>
+        </div>
+        <div class="section-body">
+          <p>When a JavaScript program begins execution, a <strong>Global Execution Context (GEC)</strong> is created automatically.</p>
+
+          <div class="flow">JavaScript Program Starts
+           │
+           ▼
+Create Global Execution Context
+           │
+           ▼
+Push GEC onto Call Stack
+           │
+           ▼
+CREATION PHASE  (hoist vars, register functions)
+           │
+           ▼
+EXECUTION PHASE  (run statements top-to-bottom)
+           │
+           ▼
+Program Ends → GEC popped from Call Stack</div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">🌐</span>
+            <div class="callout-body">In browsers, the Global EC has <code>window</code> as its global object and <code>this === window</code> at the top level. In Node.js the global object is <code>global</code>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 15 ==================== -->
+    <section class="section" id="s15">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">🎬</div>
+          <div class="section-num">15</div>
+          <div class="section-title">Creation Phase — Hoisting Behaviour</div>
+        </div>
+        <div class="section-body">
+          <p>Before statements execute, JavaScript prepares the execution environment in a <strong>Creation Phase</strong>. Different declaration types behave differently.</p>
+
+          <h2>var — Hoisted and Initialized to undefined</h2>
+          <pre><code><span class="kw">var</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span></code></pre>
+          <div class="iflow">
+            <div class="iflow-step">Creation Phase</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-amber)">a = undefined</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Execution Phase</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-green)">a = 10</div>
+          </div>
+
+          <h2>let — Hoisted but in Temporal Dead Zone</h2>
+          <pre><code><span class="kw">let</span> <span class="id">b</span> <span class="op">=</span> <span class="num">20</span><span class="pn">;</span></code></pre>
+          <div class="iflow">
+            <div class="iflow-step">Creation Phase</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-red)">b exists (TDZ)</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Exec reaches declaration</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-green)">b = 20</div>
+          </div>
+
+          <h2>const — Hoisted but in TDZ, must initialize</h2>
+          <pre><code><span class="kw">const</span> <span class="id">c</span> <span class="op">=</span> <span class="num">30</span><span class="pn">;</span>
+<span class="cm">// const x;  ← SyntaxError: Missing initializer</span></code></pre>
+
+          <h2>Comparison Table</h2>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Declaration</th>
+                <th>Hoisted?</th>
+                <th>Initial Value</th>
+                <th>Re-assignable</th>
+                <th>Scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>var</code></td>
+                <td>✅ Yes</td>
+                <td><code>undefined</code></td>
+                <td>✅ Yes</td>
+                <td>Function / Global</td>
+              </tr>
+              <tr>
+                <td><code>let</code></td>
+                <td>✅ Yes (TDZ)</td>
+                <td>Uninitialized</td>
+                <td>✅ Yes</td>
+                <td>Block</td>
+              </tr>
+              <tr>
+                <td><code>const</code></td>
+                <td>✅ Yes (TDZ)</td>
+                <td>Uninitialized</td>
+                <td>❌ No</td>
+                <td>Block</td>
+              </tr>
+              <tr>
+                <td><code>function</code></td>
+                <td>✅ Yes (full)</td>
+                <td>Full definition</td>
+                <td>✅ Yes</td>
+                <td>Function / Global</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 16 ==================== -->
+    <section class="section" id="s16">
+      <div class="section-card color-red">
+        <div class="section-header">
+          <div class="section-icon">☠️</div>
+          <div class="section-num">16</div>
+          <div class="section-title">Temporal Dead Zone (TDZ)</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Temporal Dead Zone (TDZ)</strong> is the period between <em>entering the scope</em> (where the binding is created) and the point where a <code>let</code> or <code>const</code> declaration is <em>initialized</em>. Accessing the variable in this window throws a <code>ReferenceError</code>.</p>
+            </div>
+          </div>
+
+          <pre><code><span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">a</span><span class="pn">);</span>  <span class="cm">// ❌ ReferenceError: Cannot access 'a' before initialization</span>
+
+<span class="kw">let</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span>
+
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">a</span><span class="pn">);</span>  <span class="cm">// ✅ 10</span></code></pre>
+
+          <div class="tdz-timeline">
+            <div class="tdz-step phase-start">
+              <div class="tdz-step-label">Scope Enters</div>
+              <div class="tdz-step-desc">Binding for <code>a</code> is created but uninitialized</div>
+            </div>
+            <div class="tdz-step phase-tdz">
+              <div class="tdz-step-label" style="color: var(--accent-red)">⛔ Temporal Dead Zone</div>
+              <div class="tdz-step-desc">Any access to <code>a</code> here throws <code>ReferenceError</code></div>
+            </div>
+            <div class="tdz-step phase-tdz">
+              <div class="tdz-step-label" style="color: var(--accent-red)">console.log(a) ← ReferenceError</div>
+              <div class="tdz-step-desc">This is inside the TDZ</div>
+            </div>
+            <div class="tdz-step phase-ok">
+              <div class="tdz-step-label" style="color: var(--accent-green)">let a = 10 — TDZ Ends</div>
+              <div class="tdz-step-desc">Variable is initialized, now accessible</div>
+            </div>
+            <div class="tdz-step phase-ok">
+              <div class="tdz-step-label" style="color: var(--accent-green)">✅ console.log(a) → 10</div>
+              <div class="tdz-step-desc">Safe to access after initialization</div>
+            </div>
+          </div>
+
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-body"><strong>Common mistake:</strong> Developers sometimes think <code>let</code> is not hoisted. It <em>is</em> hoisted — but unlike <code>var</code>, it is not initialized with <code>undefined</code>. Hence the TDZ.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 17 ==================== -->
+    <section class="section" id="s17">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">⬆️</div>
+          <div class="section-num">17</div>
+          <div class="section-title">Function Declaration Hoisting</div>
+        </div>
+        <div class="section-body">
+          <p>Function <em>declarations</em> are <strong>fully hoisted</strong> — the entire function body is available before execution reaches the declaration.</p>
+
+          <pre><code><span class="cm">// Called BEFORE the declaration — works fine!</span>
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="fn">add</span><span class="pn">(</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">));</span>  <span class="cm">// → 30</span>
+
+<span class="kw">function</span> <span class="fn">add</span><span class="pn">(</span><span class="id">a</span><span class="pn">,</span> <span class="id">b</span><span class="pn">) {</span>
+    <span class="kw">return</span> <span class="id">a</span> <span class="op">+</span> <span class="id">b</span><span class="pn">;</span>
+<span class="pn">}</span></code></pre>
+
+          <h2>Function Expressions Are NOT Hoisted</h2>
+          <pre><code><span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="fn">multiply</span><span class="pn">(</span><span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">));</span>  <span class="cm">// ❌ TypeError: multiply is not a function</span>
+
+<span class="kw">var</span> <span class="id">multiply</span> <span class="op">=</span> <span class="kw">function</span><span class="pn">(</span><span class="id">a</span><span class="pn">,</span> <span class="id">b</span><span class="pn">) {</span>
+    <span class="kw">return</span> <span class="id">a</span> <span class="op">*</span> <span class="id">b</span><span class="pn">;</span>
+<span class="pn">};</span>
+<span class="cm">// `var multiply` is hoisted as `undefined`
+// calling undefined as a function → TypeError</span></code></pre>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body"><strong>Best practice:</strong> Prefer <code>const</code> function expressions or always declare functions before calling them to avoid hoisting-related confusion.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 18 ==================== -->
+    <section class="section" id="s18">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">▶️</div>
+          <div class="section-num">18</div>
+          <div class="section-title">Execution Phase</div>
+        </div>
+        <div class="section-body">
+          <p>After the creation phase completes, the <strong>Execution Phase</strong> begins. Statements are executed in order, and variable assignments happen at this point.</p>
+
+          <pre><code><span class="kw">var</span> <span class="id">a</span> <span class="op">=</span> <span class="num">10</span><span class="pn">;</span>
+<span class="kw">let</span> <span class="id">b</span> <span class="op">=</span> <span class="num">20</span><span class="pn">;</span>
+<span class="kw">const</span> <span class="id">c</span> <span class="op">=</span> <span class="num">30</span><span class="pn">;</span></code></pre>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">EXECUTION PHASE</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> Execute: <span class="t-kw">var a = 10</span>    → a: <span class="t-sub">undefined</span> → <span class="t-item">10</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> Execute: <span class="t-kw">let b = 20</span>    → b: <span class="t-sub">TDZ ends</span>  → <span class="t-item">20</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> Execute: <span class="t-kw">const c = 30</span>  → c: <span class="t-sub">TDZ ends</span>  → <span class="t-item">30</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 19 ==================== -->
+    <section class="section" id="s19">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🔧</div>
+          <div class="section-num">19</div>
+          <div class="section-title">Function Execution Context</div>
+        </div>
+        <div class="section-body">
+          <p>Every time a function is <strong>called</strong>, a brand-new <strong>Function Execution Context (FEC)</strong> is created and pushed onto the Call Stack.</p>
+
+          <pre><code><span class="kw">function</span> <span class="fn">add</span><span class="pn">(</span><span class="id">x</span><span class="pn">,</span> <span class="id">y</span><span class="pn">) {</span>
+    <span class="kw">return</span> <span class="id">x</span> <span class="op">+</span> <span class="id">y</span><span class="pn">;</span>
+<span class="pn">}</span>
+
+<span class="fn">add</span><span class="pn">(</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">);</span>  <span class="cm">// new FEC created here</span></code></pre>
+
+          <div class="flow">Function Call: add(10, 20)
+      │
+      ▼
+Create Function Execution Context
+      │
+      ▼
+Push FEC onto Call Stack
+      │
+      ▼
+Creation Phase
+      ├── x = 10  (parameter binding)
+      ├── y = 20  (parameter binding)
+      └── local variables / inner functions
+      │
+      ▼
+Execution Phase
+      ├── Execute statements
+      └── return x + y  →  30
+      │
+      ▼
+Return value propagated to caller
+      │
+      ▼
+FEC popped from Call Stack
+      │
+      ▼
+Resume previous Execution Context</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 20 ==================== -->
+    <section class="section" id="s20">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">📚</div>
+          <div class="section-num">20</div>
+          <div class="section-title">Call Stack</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Call Stack</strong> is a <em>LIFO (Last In, First Out)</em> data structure that tracks all active Execution Contexts. When a function is called, its EC is pushed; when it returns, its EC is popped.</p>
+            </div>
+          </div>
+
+          <pre><code><span class="kw">function</span> <span class="fn">one</span><span class="pn">() {</span>
+    <span class="fn">two</span><span class="pn">();</span>
+<span class="pn">}</span>
+
+<span class="kw">function</span> <span class="fn">two</span><span class="pn">() {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Hello"</span><span class="pn">);</span>
+<span class="pn">}</span>
+
+<span class="fn">one</span><span class="pn">();</span></code></pre>
+
+          <h2>Stack State During Execution</h2>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; margin: 16px 0;">
+            <div>
+              <p style="font-size:0.78rem; color: var(--text-muted); text-align:center; margin-bottom: 6px;">Peak state</p>
+              <div class="stack-visual">
+                <div class="stack-arrow">← top</div>
+                <div class="stack-frame top">console.log()</div>
+                <div class="stack-frame mid">two()</div>
+                <div class="stack-frame mid">one()</div>
+                <div class="stack-frame global">Global Context</div>
+              </div>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+              <h3>Unwinding</h3>
+              <div class="highlight-row">
+                <div class="highlight-row-icon">1️⃣</div>
+                <div class="highlight-row-text"><code>console.log()</code> completes → <strong>Pop</strong></div>
+              </div>
+              <div class="highlight-row">
+                <div class="highlight-row-icon">2️⃣</div>
+                <div class="highlight-row-text"><code>two()</code> completes → <strong>Pop</strong></div>
+              </div>
+              <div class="highlight-row">
+                <div class="highlight-row-icon">3️⃣</div>
+                <div class="highlight-row-text"><code>one()</code> completes → <strong>Pop</strong></div>
+              </div>
+              <div class="highlight-row">
+                <div class="highlight-row-icon">4️⃣</div>
+                <div class="highlight-row-text"><strong>Global Context</strong> stays until program ends</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-danger">
+            <span class="callout-icon">💥</span>
+            <div class="callout-body"><strong>Stack Overflow:</strong> Infinite recursion causes the stack to exceed its limit, throwing a <code>RangeError: Maximum call stack size exceeded</code>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 21 ==================== -->
+    <section class="section" id="s21">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🗺</div>
+          <div class="section-num">21</div>
+          <div class="section-title">Complete Execution Context Flow</div>
+        </div>
+        <div class="section-body">
+          <div class="flow">PROGRAM STARTS
+      │
+      ▼
+Create Global Execution Context
+      │
+      ▼
+Push GEC onto Call Stack
+      │
+      ▼
+CREATION PHASE
+├── var declarations    → initialized with undefined
+├── let / const         → binding created, TDZ active
+└── function decls      → fully hoisted and available
+      │
+      ▼
+EXECUTION PHASE — run statements top-to-bottom
+      │
+      ▼
+Function Call encountered?
+      │
+ ┌────┴─────┐
+ │          │
+ No        Yes
+ │          │
+ ▼          ▼
+Continue  Create Function Execution Context (FEC)
+             │
+             ▼
+          Push FEC onto Call Stack
+             │
+             ▼
+          Creation + Execution (same phases)
+             │
+             ▼
+          return → pop FEC → resume caller
+      │
+      ▼
+Global code finishes → pop GEC → program done</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 22 ==================== -->
+    <section class="section" id="s22">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">💾</div>
+          <div class="section-num">22</div>
+          <div class="section-title">Memory Heap</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Memory Heap</strong> is a large, unstructured memory region used to store <em>dynamically allocated</em> values — primarily objects, arrays, and functions. Variables hold <em>references</em> (pointers) to heap-allocated values.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+            <div>
+              <h2>Call Stack stores</h2>
+              <div class="highlight-row"><div class="highlight-row-icon">🔢</div><div class="highlight-row-text">Primitive values (<code>number</code>, <code>boolean</code>, <code>string</code>…)</div></div>
+              <div class="highlight-row"><div class="highlight-row-icon">📌</div><div class="highlight-row-text">References to heap objects</div></div>
+              <div class="highlight-row"><div class="highlight-row-icon">📋</div><div class="highlight-row-text">Execution context info</div></div>
+            </div>
+            <div>
+              <h2>Heap stores</h2>
+              <div class="highlight-row"><div class="highlight-row-icon">📦</div><div class="highlight-row-text">Objects <code>{ }</code></div></div>
+              <div class="highlight-row"><div class="highlight-row-icon">📋</div><div class="highlight-row-text">Arrays <code>[ ]</code></div></div>
+              <div class="highlight-row"><div class="highlight-row-icon">🔧</div><div class="highlight-row-text">Functions, Maps, Sets</div></div>
+            </div>
+          </div>
+
+          <pre><code><span class="kw">const</span> <span class="id">user</span> <span class="op">=</span> <span class="pn">{</span>
+    <span class="id">name</span><span class="pn">:</span> <span class="str">"Aditya"</span><span class="pn">,</span>
+    <span class="id">age</span><span class="pn">:</span>  <span class="num">21</span>
+<span class="pn">};</span>
+
+<span class="cm">// Stack:  user → 0x1a4f  (reference)
+// Heap:   0x1a4f → { name: "Aditya", age: 21 }</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 23 ==================== -->
+    <section class="section" id="s23">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">🗑</div>
+          <div class="section-num">23</div>
+          <div class="section-title">Garbage Collection</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Garbage Collection (GC)</strong> is the automatic process of reclaiming heap memory occupied by data that is no longer reachable. V8 uses a <em>generational</em> mark-and-sweep approach.</p>
+            </div>
+          </div>
+
+          <h2>Mark-and-Sweep Algorithm</h2>
+          <div class="flow">GC Cycle Begins
+      │
+      ▼
+MARK PHASE
+      ├── Start from GC roots (global, stack refs)
+      └── Traverse all reachable objects → mark them
+      │
+      ▼
+SWEEP PHASE
+      ├── Scan heap
+      └── Free memory for all UNMARKED objects
+      │
+      ▼
+GC Cycle Ends</div>
+
+          <h2>V8 Generational GC</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;">
+            <div class="api-card">
+              <div class="api-card-header">
+                <div class="api-card-icon">🐣</div>
+                <div class="api-card-title">Young Generation (Scavenger)</div>
+              </div>
+              <p style="font-size:0.8rem; color: var(--text-muted); margin:0">Short-lived objects. Collected frequently and quickly. Most objects die young.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header">
+                <div class="api-card-icon">🏛</div>
+                <div class="api-card-title">Old Generation (Major GC)</div>
+              </div>
+              <p style="font-size:0.8rem; color: var(--text-muted); margin:0">Long-lived objects that survive young gen collection. Collected less frequently.</p>
+            </div>
+          </div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">JavaScript developers do <strong>not manually free memory</strong>. However, holding onto references unintentionally (memory leaks) can prevent GC from collecting objects.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 24 ==================== -->
+    <section class="section" id="s24">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">📊</div>
+          <div class="section-num">24</div>
+          <div class="section-title">Runtime Feedback</div>
+        </div>
+        <div class="section-body">
+          <p>While bytecode executes, Ignition gathers <strong>runtime feedback</strong> — profiling data that the engine uses to make optimization decisions.</p>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">RUNTIME FEEDBACK</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">Execution frequency</span>  <span class="t-sub">How often is each code path hit?</span>
+<span class="t-br">├──</span> <span class="t-kw">Type information</span>     <span class="t-sub">What types do variables hold?</span>
+<span class="t-br">├──</span> <span class="t-kw">Object shapes</span>        <span class="t-sub">Property layout (hidden classes)</span>
+<span class="t-br">└──</span> <span class="t-kw">Branch outcomes</span>      <span class="t-sub">Which branches are taken most?</span></div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">V8 uses <strong>Inline Caches (ICs)</strong> and <strong>Hidden Classes (Shapes)</strong> to track type feedback. Writing monomorphic code (consistent types) allows V8 to optimize more aggressively.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 25 ==================== -->
+    <section class="section" id="s25">
+      <div class="section-card color-orange">
+        <div class="section-header">
+          <div class="section-icon">🔥</div>
+          <div class="section-num">25</div>
+          <div class="section-title">Hot Code</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Hot Code</strong> refers to code paths executed <em>frequently enough</em> that the cost of compiling them to optimized machine code is justified by the performance gain.</p>
+            </div>
+          </div>
+
+          <div class="flow">Code Executes
+      │
+      ▼
+Ignition tracks invocation counter
+      │
+      ▼
+Counter exceeds threshold?
+      │
+ ┌────┴────┐
+ │         │
+No        Yes → HOT CODE
+ │                  │
+ ▼                  ▼
+Continue     Mark for TurboFan optimization
+Normally           │
+                   ▼
+         TurboFan compiles to machine code
+                   │
+                   ▼
+         Future calls use optimized path</div>
+
+          <div class="callout callout-note">
+            <span class="callout-icon">📌</span>
+            <div class="callout-body"><strong>Deoptimization:</strong> If runtime behavior contradicts TurboFan's assumptions (e.g., a variable suddenly holds a different type), V8 <em>deoptimizes</em> back to bytecode and re-profiles.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 26 ==================== -->
+    <section class="section" id="s26">
+      <div class="section-card color-pink">
+        <div class="section-header">
+          <div class="section-icon">🚀</div>
+          <div class="section-num">26</div>
+          <div class="section-title">JIT Compilation &amp; TurboFan</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Just-In-Time (JIT) Compilation</strong> compiles selected code into native machine code <em>at runtime</em>, while the program is running. V8's optimizing compiler is <strong>TurboFan</strong>.</p>
+            </div>
+          </div>
+
+          <div class="iflow">
+            <div class="iflow-step">Bytecode</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Runtime Feedback</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Hot Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-pink)">TurboFan</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-green)">Optimized Machine Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">CPU</div>
+          </div>
+
+          <h2>TurboFan Optimizations Include</h2>
+          <div class="highlight-row"><div class="highlight-row-icon">📌</div><div class="highlight-row-text"><strong>Inlining:</strong> Replaces function calls with the function body to avoid call overhead</div></div>
+          <div class="highlight-row"><div class="highlight-row-icon">📌</div><div class="highlight-row-text"><strong>Type specialization:</strong> Generates machine code for specific observed types</div></div>
+          <div class="highlight-row"><div class="highlight-row-icon">📌</div><div class="highlight-row-text"><strong>Dead code elimination:</strong> Removes branches that are never taken</div></div>
+          <div class="highlight-row"><div class="highlight-row-icon">📌</div><div class="highlight-row-text"><strong>Escape analysis:</strong> Stack-allocates objects that don't escape their function</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 27 ==================== -->
+    <section class="section" id="s27">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">⚡</div>
+          <div class="section-num">27</div>
+          <div class="section-title">Machine Code &amp; CPU Execution</div>
+        </div>
+        <div class="section-body">
+          <p><strong>Machine code</strong> consists of low-level binary instructions that the CPU can execute directly without any further translation.</p>
+
+          <div class="iflow">
+            <div class="iflow-step">JS Source Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">AST</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Bytecode</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-green)">Optimized Machine Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color: var(--accent-amber)">CPU</div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">⚡</span>
+            <div class="callout-body">Optimized machine code runs at speeds comparable to C++ for hot paths, which is why JavaScript is remarkably fast despite being a high-level language.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 28 ==================== -->
+    <section class="section" id="s28">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🌍</div>
+          <div class="section-num">28</div>
+          <div class="section-title">Environment APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Environment APIs</strong> are capabilities provided by the <em>surrounding runtime environment</em>, not by the JavaScript engine itself. The DOM, <code>fetch</code>, <code>setTimeout</code>, and <code>fs.readFile</code> are all environment APIs.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🌐</div><div class="api-card-title">Browser Runtime</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">V8 Engine</div>
+                <div class="api-card-item">DOM APIs</div>
+                <div class="api-card-item">Timer APIs</div>
+                <div class="api-card-item">Network (fetch, XHR)</div>
+                <div class="api-card-item">Event System</div>
+                <div class="api-card-item">Storage APIs</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🟢</div><div class="api-card-title">Node.js Runtime</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">V8 Engine</div>
+                <div class="api-card-item">node:fs</div>
+                <div class="api-card-item">node:http / https</div>
+                <div class="api-card-item">node:net</div>
+                <div class="api-card-item">process</div>
+                <div class="api-card-item">Streams</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 29 ==================== -->
+    <section class="section" id="s29">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🌐</div>
+          <div class="section-num">29</div>
+          <div class="section-title">Browser Runtime</div>
+        </div>
+        <div class="section-body">
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-root">BROWSER RUNTIME</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">JavaScript Engine (V8)</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Browser APIs</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">DOM</span>             <span class="t-sub">Document Object Model</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Timers</span>          <span class="t-sub">setTimeout, setInterval</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Network</span>         <span class="t-sub">fetch, XMLHttpRequest, WebSocket</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Events</span>          <span class="t-sub">addEventListener</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Storage</span>         <span class="t-sub">localStorage, sessionStorage, IndexedDB</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Device / Location</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Web Workers</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Queues</span>
+<span class="t-br">│   ├──</span> <span class="t-item">Microtask Queue</span>
+<span class="t-br">│   └──</span> <span class="t-item">Task Queue</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-cat">Event Loop</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTIONS 30–36 (API Categories) ==================== -->
+    <section class="section" id="s30">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">🏗</div>
+          <div class="section-num">30</div>
+          <div class="section-title">DOM APIs</div>
+        </div>
+        <div class="section-body">
+          <p>DOM APIs allow JavaScript to <strong>read, create, modify, remove, and respond</strong> to the HTML document. The browser parses HTML into a tree (the DOM) that JS can manipulate.</p>
+
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔍</div><div class="api-card-title">Selection</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">getElementById()</div>
+                <div class="api-card-item">querySelector()</div>
+                <div class="api-card-item">querySelectorAll()</div>
+                <div class="api-card-item">getElementsByClassName()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🏗</div><div class="api-card-title">Creation</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">createElement()</div>
+                <div class="api-card-item">createTextNode()</div>
+                <div class="api-card-item">cloneNode()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">✏️</div><div class="api-card-title">Modification</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">append() / prepend()</div>
+                <div class="api-card-item">remove()</div>
+                <div class="api-card-item">replaceWith()</div>
+                <div class="api-card-item">insertAdjacentHTML()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📝</div><div class="api-card-title">Content / Attrs</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">textContent</div>
+                <div class="api-card-item">innerHTML</div>
+                <div class="api-card-item">getAttribute() / setAttribute()</div>
+                <div class="api-card-item">classList</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s31">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">⏱</div>
+          <div class="section-num">31</div>
+          <div class="section-title">Timer APIs</div>
+        </div>
+        <div class="section-body">
+          <p>Timer APIs schedule callbacks to become eligible for execution later. They do <strong>not block</strong> the main thread — the delay is handled by the browser's C++ timer subsystem.</p>
+
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">1️⃣</div><div class="api-card-title">One-Time</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">setTimeout(fn, ms)</div>
+                <div class="api-card-item">clearTimeout(id)</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔁</div><div class="api-card-title">Repeating</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">setInterval(fn, ms)</div>
+                <div class="api-card-item">clearInterval(id)</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🎞</div><div class="api-card-title">Animation</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">requestAnimationFrame()</div>
+                <div class="api-card-item">cancelAnimationFrame()</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pre-label">Timer Flow</div>
+          <div class="flow">setTimeout(fn, 2000)
+      │
+      ▼
+Browser Timer System handles the delay
+      │  (2000ms pass)
+      ▼
+Callback is pushed to → Task Queue
+      │
+      ▼
+Event Loop checks: Call Stack empty?
+      │  (Yes)
+      ▼
+Callback moved to Call Stack → Executes</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s32">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🌐</div>
+          <div class="section-num">32</div>
+          <div class="section-title">Network APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📡</div><div class="api-card-title">Fetch API</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">fetch(url, options)</div>
+                <div class="api-card-item">Request / Response</div>
+                <div class="api-card-item">Headers</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📬</div><div class="api-card-title">Legacy</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">XMLHttpRequest</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔌</div><div class="api-card-title">Real-time</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">WebSocket</div>
+                <div class="api-card-item">Server-Sent Events</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pre-label">Fetch + Promise Flow</div>
+          <pre><code><span class="fn">fetch</span><span class="pn">(</span><span class="str">"/api/users"</span><span class="pn">)</span>
+    <span class="pn">.</span><span class="fn">then</span><span class="pn">(</span><span class="id">res</span>  <span class="op">=&gt;</span> <span class="id">res</span><span class="pn">.</span><span class="fn">json</span><span class="pn">())</span>
+    <span class="pn">.</span><span class="fn">then</span><span class="pn">(</span><span class="id">data</span> <span class="op">=&gt;</span> <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">data</span><span class="pn">));</span>
+<span class="cm">// Promise reactions → Microtask Queue (high priority)</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s33">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🖱</div>
+          <div class="section-num">33</div>
+          <div class="section-title">Event APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📋</div><div class="api-card-title">Registration</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">addEventListener()</div>
+                <div class="api-card-item">removeEventListener()</div>
+                <div class="api-card-item">dispatchEvent()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🖱</div><div class="api-card-title">Mouse Events</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">click / dblclick</div>
+                <div class="api-card-item">mouseenter / mouseleave</div>
+                <div class="api-card-item">mousemove</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">⌨️</div><div class="api-card-title">Keyboard Events</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">keydown</div>
+                <div class="api-card-item">keyup</div>
+                <div class="api-card-item">keypress (deprecated)</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📝</div><div class="api-card-title">Form Events</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">input / change</div>
+                <div class="api-card-item">submit / reset</div>
+                <div class="api-card-item">focus / blur</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🌐</div><div class="api-card-title">Browser Events</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">load / DOMContentLoaded</div>
+                <div class="api-card-item">resize / scroll</div>
+                <div class="api-card-item">visibilitychange</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s34">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">💽</div>
+          <div class="section-num">34</div>
+          <div class="section-title">Storage APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔑</div><div class="api-card-title">localStorage</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Persistent (no expiry)</div>
+                <div class="api-card-item">~5-10 MB per origin</div>
+                <div class="api-card-item">Synchronous</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🗓</div><div class="api-card-title">sessionStorage</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Tab-scoped, expires on close</div>
+                <div class="api-card-item">~5-10 MB per origin</div>
+                <div class="api-card-item">Synchronous</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🗄</div><div class="api-card-title">IndexedDB</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Large structured data</div>
+                <div class="api-card-item">Asynchronous</div>
+                <div class="api-card-item">Query support</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📦</div><div class="api-card-title">Cache Storage</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Service Worker cache</div>
+                <div class="api-card-item">Stores Request/Response</div>
+                <div class="api-card-item">Offline capability</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s35">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">📍</div>
+          <div class="section-num">35</div>
+          <div class="section-title">Device &amp; Location APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📍</div><div class="api-card-title">Geolocation</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">getCurrentPosition()</div>
+                <div class="api-card-item">watchPosition()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🎥</div><div class="api-card-title">Media Devices</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">getUserMedia() → camera</div>
+                <div class="api-card-item">getUserMedia() → mic</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📋</div><div class="api-card-title">Clipboard</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">navigator.clipboard.read()</div>
+                <div class="api-card-item">navigator.clipboard.write()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔔</div><div class="api-card-title">Notifications</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Notification.requestPermission()</div>
+                <div class="api-card-item">new Notification(title)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="s36">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">👷</div>
+          <div class="section-num">36</div>
+          <div class="section-title">Web Worker APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Web Workers</strong> allow JavaScript to run code on a <em>separate thread</em>, parallel to the main thread. This keeps the UI responsive during heavy computation.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🖥</div><div class="api-card-title">Main Thread</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">UI rendering</div>
+                <div class="api-card-item">DOM interaction</div>
+                <div class="api-card-item">Event handling</div>
+                <div class="api-card-item">JS execution</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">👷</div><div class="api-card-title">Web Worker Thread</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">Heavy computation</div>
+                <div class="api-card-item">Data processing</div>
+                <div class="api-card-item">No DOM access</div>
+                <div class="api-card-item">postMessage() to communicate</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-body">Web Workers <strong>cannot directly access the DOM</strong>. They communicate with the main thread via <code>postMessage()</code> / <code>onmessage</code>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 37 ==================== -->
+    <section class="section" id="s37">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🟢</div>
+          <div class="section-num">37</div>
+          <div class="section-title">Node.js Runtime</div>
+        </div>
+        <div class="section-body">
+          <p>Node.js is a <strong>server-side JavaScript runtime</strong> built on V8. Instead of browser APIs, it exposes system-level APIs for file I/O, networking, and processes.</p>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-root">NODE.JS RUNTIME</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">V8 JavaScript Engine</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">libuv</span>                   <span class="t-sub">C library: event loop + async I/O</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-cat">Node.js APIs</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:fs</span>             <span class="t-sub">File System</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:http / https</span>   <span class="t-sub">HTTP Server + Client</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:net</span>            <span class="t-sub">TCP / UDP</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:stream</span>         <span class="t-sub">Streaming data</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:crypto</span>         <span class="t-sub">Cryptography</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:path</span>           <span class="t-sub">Path utilities</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:os</span>             <span class="t-sub">OS info</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">node:events</span>         <span class="t-sub">EventEmitter</span>
+<span class="t-br">│   └──</span> <span class="t-kw">node:child_process</span>  <span class="t-sub">Spawn processes</span>
+<span class="t-br">│</span>
+<span class="t-br">└──</span> <span class="t-cat">Event Loop (libuv)</span>     <span class="t-sub">Async I/O coordination</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 38 ==================== -->
+    <section class="section" id="s38">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">📁</div>
+          <div class="section-num">38</div>
+          <div class="section-title">Node.js APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📁</div><div class="api-card-title">node:fs</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">readFile() / writeFile()</div>
+                <div class="api-card-item">appendFile()</div>
+                <div class="api-card-item">unlink() / mkdir()</div>
+                <div class="api-card-item">readdir() / stat()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🌐</div><div class="api-card-title">node:http</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">createServer()</div>
+                <div class="api-card-item">request() / get()</div>
+                <div class="api-card-item">IncomingMessage</div>
+                <div class="api-card-item">ServerResponse</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔌</div><div class="api-card-title">node:net</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">createServer()</div>
+                <div class="api-card-item">createConnection()</div>
+                <div class="api-card-item">Socket</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">⚙️</div><div class="api-card-title">process</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">process.argv</div>
+                <div class="api-card-item">process.env</div>
+                <div class="api-card-item">process.exit()</div>
+                <div class="api-card-item">process.pid</div>
+              </div>
+            </div>
+          </div>
+
+          <h2>HTTP Server Flow</h2>
+          <div class="flow">Client → HTTP Request → Node.js Server
+                                      │
+                                Request Handler (cb)
+                                      │
+                                Business Logic
+                                      │
+                                Response sent → Client</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 39 ==================== -->
+    <section class="section" id="s39">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">🌊</div>
+          <div class="section-num">39</div>
+          <div class="section-title">Streams</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p><strong>Streams</strong> allow data to be <em>processed progressively</em> in chunks rather than loading the entire dataset into memory. Essential for large files, video, network data.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 16px 0;">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📖</div><div class="api-card-title">Readable</div></div>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin:0">Read data from a source</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">✏️</div><div class="api-card-title">Writable</div></div>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin:0">Write data to a destination</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">↔️</div><div class="api-card-title">Duplex</div></div>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin:0">Read and write (e.g., TCP socket)</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔄</div><div class="api-card-title">Transform</div></div>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin:0">Read → process → write (e.g., gzip)</p>
+            </div>
+          </div>
+
+          <div class="iflow">
+            <div class="iflow-step">Large File</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Chunk 1</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Process</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Chunk 2</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Process</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 40 ==================== -->
+    <section class="section" id="s40">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🔮</div>
+          <div class="section-num">40</div>
+          <div class="section-title">Other Important Node.js APIs</div>
+        </div>
+        <div class="section-body">
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📂</div><div class="api-card-title">node:path</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">path.join()</div>
+                <div class="api-card-item">path.resolve()</div>
+                <div class="api-card-item">path.extname()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">💻</div><div class="api-card-title">node:os</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">os.platform()</div>
+                <div class="api-card-item">os.cpus()</div>
+                <div class="api-card-item">os.totalmem()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔐</div><div class="api-card-title">node:crypto</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">createHash()</div>
+                <div class="api-card-item">randomBytes()</div>
+                <div class="api-card-item">encrypt / decrypt</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📢</div><div class="api-card-title">node:events</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">EventEmitter</div>
+                <div class="api-card-item">on() / emit()</div>
+                <div class="api-card-item">once() / off()</div>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🧒</div><div class="api-card-title">child_process</div></div>
+              <div class="api-card-items">
+                <div class="api-card-item">exec() / execFile()</div>
+                <div class="api-card-item">spawn()</div>
+                <div class="api-card-item">fork()</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 41 ==================== -->
+    <section class="section" id="s41">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">⚖️</div>
+          <div class="section-num">41</div>
+          <div class="section-title">Synchronous vs Asynchronous Code</div>
+        </div>
+        <div class="section-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0;">
+            <div>
+              <h2>Synchronous</h2>
+              <p style="font-size:0.85rem;">Tasks run one after another. Each line waits for the previous to finish.</p>
+              <div class="flow">Task 1 → completes
+Task 2 → completes
+Task 3 → completes
+(blocking)</div>
+            </div>
+            <div>
+              <h2>Asynchronous</h2>
+              <p style="font-size:0.85rem;">Long-running operations are handed off to the environment; JS continues.</p>
+              <div class="flow">Start Async Op
+→ hand off to env
+→ JS continues...
+→ Op completes later
+→ Callback runs</div>
+            </div>
+          </div>
+
+          <pre><code><span class="cm">// Synchronous — blocks</span>
+<span class="kw">const</span> <span class="id">data</span> <span class="op">=</span> <span class="id">fs</span><span class="pn">.</span><span class="fn">readFileSync</span><span class="pn">(</span><span class="str">'file.txt'</span><span class="pn">);</span>  <span class="cm">// waits</span>
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">data</span><span class="pn">);</span>
+
+<span class="cm">// Asynchronous — non-blocking</span>
+<span class="id">fs</span><span class="pn">.</span><span class="fn">readFile</span><span class="pn">(</span><span class="str">'file.txt'</span><span class="pn">,</span> <span class="pn">(</span><span class="id">err</span><span class="pn">,</span> <span class="id">data</span><span class="pn">) =&gt; {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="id">data</span><span class="pn">);</span>  <span class="cm">// runs later</span>
+<span class="pn">});</span>
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"continues immediately"</span><span class="pn">);</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 42 ==================== -->
+    <section class="section" id="s42">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">⚡</div>
+          <div class="section-num">42</div>
+          <div class="section-title">Microtask Queue</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Microtask Queue</strong> holds <em>high-priority</em> asynchronous continuations. After each task, <strong>all microtasks are drained</strong> before the next task starts.</p>
+            </div>
+          </div>
+
+          <h2>Sources of Microtasks</h2>
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">MICROTASK QUEUE</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">Promise.then()</span>
+<span class="t-br">├──</span> <span class="t-kw">Promise.catch()</span>
+<span class="t-br">├──</span> <span class="t-kw">Promise.finally()</span>
+<span class="t-br">├──</span> <span class="t-kw">queueMicrotask()</span>
+<span class="t-br">└──</span> <span class="t-kw">MutationObserver</span>  <span class="t-sub">(browser)</span></div>
+          </div>
+
+          <pre><code><span class="id">Promise</span><span class="pn">.</span><span class="fn">resolve</span><span class="pn">().</span><span class="fn">then</span><span class="pn">(() =&gt; {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Promise"</span><span class="pn">);</span>
+<span class="pn">});</span>
+<span class="cm">// Callback goes to Microtask Queue → runs BEFORE next timer/event</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 43 ==================== -->
+    <section class="section" id="s43">
+      <div class="section-card color-orange">
+        <div class="section-header">
+          <div class="section-icon">📋</div>
+          <div class="section-num">43</div>
+          <div class="section-title">Task Queue (Macrotask Queue)</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Task Queue</strong> (also called Macrotask Queue or Callback Queue) holds callbacks that become eligible in later event-loop turns. The event loop processes <em>one task per turn</em>, then drains microtasks.</p>
+            </div>
+          </div>
+
+          <h2>Sources of Tasks</h2>
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-cat">TASK QUEUE</span>
+<span class="t-br">│</span>
+<span class="t-br">├──</span> <span class="t-kw">setTimeout()</span>      <span class="t-sub">even with 0ms delay</span>
+<span class="t-br">├──</span> <span class="t-kw">setInterval()</span>
+<span class="t-br">├──</span> <span class="t-kw">User Events</span>       <span class="t-sub">click, keydown…</span>
+<span class="t-br">├──</span> <span class="t-kw">I/O Callbacks</span>     <span class="t-sub">Node.js fs, net…</span>
+<span class="t-br">└──</span> <span class="t-kw">setImmediate()</span>    <span class="t-sub">Node.js only</span></div>
+          </div>
+
+          <pre><code><span class="fn">setTimeout</span><span class="pn">(() =&gt; {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Timer"</span><span class="pn">);</span>
+<span class="pn">},</span> <span class="num">0</span><span class="pn">);</span>
+<span class="cm">// Even with 0ms delay, callback runs in a FUTURE task, not synchronously</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 44 ==================== -->
+    <section class="section" id="s44">
+      <div class="section-card color-teal">
+        <div class="section-header">
+          <div class="section-icon">🔁</div>
+          <div class="section-num">44</div>
+          <div class="section-title">Event Loop</div>
+        </div>
+        <div class="section-body">
+          <div class="def-box">
+            <div class="def-box-icon">🔍</div>
+            <div class="def-box-content">
+              <p>The <strong>Event Loop</strong> is the mechanism that coordinates JavaScript's single-threaded execution with the asynchronous operations provided by the runtime environment.</p>
+            </div>
+          </div>
+
+          <h2>Architecture</h2>
+          <div class="event-loop-diagram">
+            <div class="el-box">
+              <div class="el-box-title" style="color: var(--accent-purple)">Call Stack</div>
+              <div class="el-box-items">
+                <div class="el-box-item" style="background: rgba(124,109,250,0.1); color: var(--accent-primary)">Global EC</div>
+                <div class="el-box-item">→ function calls stacked here</div>
+                <div class="el-box-item">→ popped on return</div>
+              </div>
+            </div>
+            <div class="el-center">
+              <div class="el-loop-badge">Event Loop</div>
+              <div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">coordinates</div>
+            </div>
+            <div>
+              <div class="el-box" style="margin-bottom:10px;">
+                <div class="el-box-title" style="color: var(--accent-primary)">Microtask Queue</div>
+                <div class="el-box-items">
+                  <div class="el-box-item">Promise.then()</div>
+                  <div class="el-box-item">queueMicrotask()</div>
+                </div>
+              </div>
+              <div class="el-box">
+                <div class="el-box-title" style="color: var(--accent-orange)">Task Queue</div>
+                <div class="el-box-items">
+                  <div class="el-box-item">setTimeout()</div>
+                  <div class="el-box-item">Events / I/O</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h2>Event Loop Algorithm (simplified)</h2>
+          <div class="flow">LOOP starts
+  │
+  ▼
+Execute current synchronous code (Call Stack)
+  │
+  ▼
+Drain Microtask Queue (ALL of them, including new ones)
+  │
+  ▼
+Pick ONE task from Task Queue → execute it
+  │
+  ▼
+Drain Microtask Queue again
+  │
+  ▼
+Repeat forever (or until nothing left)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 45 ==================== -->
+    <section class="section" id="s45">
+      <div class="section-card color-green">
+        <div class="section-header">
+          <div class="section-icon">🏆</div>
+          <div class="section-num">45</div>
+          <div class="section-title">Microtask vs Task Priority</div>
+        </div>
+        <div class="section-body">
+          <p>The classic quiz — what is the output order?</p>
+
+          <pre><code><span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Start"</span><span class="pn">);</span>                   <span class="cm">// 1</span>
+
+<span class="fn">setTimeout</span><span class="pn">(() =&gt; {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Timeout"</span><span class="pn">);</span>             <span class="cm">// 4</span>
+<span class="pn">},</span> <span class="num">0</span><span class="pn">);</span>
+
+<span class="id">Promise</span><span class="pn">.</span><span class="fn">resolve</span><span class="pn">().</span><span class="fn">then</span><span class="pn">(() =&gt; {</span>
+    <span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"Promise"</span><span class="pn">);</span>              <span class="cm">// 3</span>
+<span class="pn">});</span>
+
+<span class="id">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">"End"</span><span class="pn">);</span>                     <span class="cm">// 2</span></code></pre>
+
+          <h2>Execution Order Breakdown</h2>
+          <div class="pipeline">
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color:var(--accent-primary);background:rgba(124,109,250,0.3)"></div>
+                <div class="pipeline-line"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color:var(--accent-primary)">① Synchronous Code</div>
+                <div class="pipeline-desc">Prints <strong>Start</strong> → registers timer → registers promise → Prints <strong>End</strong></div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color:var(--accent-teal);background:rgba(45,212,191,0.3)"></div>
+                <div class="pipeline-line"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color:var(--accent-teal)">② Microtask Queue drained</div>
+                <div class="pipeline-desc">Prints <strong>Promise</strong></div>
+              </div>
+            </div>
+            <div class="pipeline-step">
+              <div class="pipeline-connector">
+                <div class="pipeline-dot" style="border-color:var(--accent-orange);background:rgba(251,146,60,0.3)"></div>
+              </div>
+              <div class="pipeline-content">
+                <div class="pipeline-label" style="color:var(--accent-orange)">③ Next Task from Task Queue</div>
+                <div class="pipeline-desc">Prints <strong>Timeout</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body"><strong>Output:</strong> <code>Start → End → Promise → Timeout</code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 46 ==================== -->
+    <section class="section" id="s46">
+      <div class="section-card color-blue">
+        <div class="section-header">
+          <div class="section-icon">🌊</div>
+          <div class="section-num">46</div>
+          <div class="section-title">Complete Asynchronous Execution Flow</div>
+        </div>
+        <div class="section-body">
+          <div class="flow">JAVASCRIPT CODE
+       │
+       ▼
+CALL STACK — synchronous execution
+       │
+       ▼
+Async Operation Encountered?
+       │
+ ┌─────┴──────┐
+ │            │
+No           Yes
+ │            │
+ ▼            ▼
+Execute    Hand off to Environment API
+Normally        │
+           ┌────┼──────┐
+           │    │      │
+         Timer Net   Event
+           │    │      │
+           └────┼──────┘
+                │
+                ▼
+       Operation Completes
+                │
+        ┌───────┴────────┐
+        │                │
+  Promise / MO?      setTimeout / Event?
+        │                │
+        ▼                ▼
+  Microtask Queue    Task Queue
+        │                │
+        └───────┬────────┘
+                │
+                ▼
+           Event Loop
+                │
+                ▼
+     Call Stack Empty?  ──No──▶  Wait
+                │ Yes
+                ▼
+         Drain Microtasks
+                │
+                ▼
+         One Task from Task Queue
+                │
+                ▼
+          Execute Callback
+                │
+                ▼
+             Repeat ↺</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 47 ==================== -->
+    <section class="section" id="s47">
+      <div class="section-card color-purple">
+        <div class="section-header">
+          <div class="section-icon">🗺</div>
+          <div class="section-num">47</div>
+          <div class="section-title">Final Complete JavaScript Runtime Hierarchy</div>
+        </div>
+        <div class="section-body">
+          <div class="callout callout-note">
+            <span class="callout-icon">📌</span>
+            <div class="callout-body">This is the <strong>most important revision diagram</strong>. Use it as the master reference for all JavaScript execution concepts.</div>
+          </div>
+
+          <div class="tree-wrap">
+            <div class="tree"><span class="t-root">JAVASCRIPT RUNTIME</span>
+<span class="t-br">│</span>
+<span class="t-br">├── 1.</span> <span class="t-cat">JAVASCRIPT ENGINE (V8)</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Code Processing</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Lexical Analysis → Tokenizer → Tokens</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Parsing → Grammar Check</span>
+<span class="t-br">│   │   └──</span> <span class="t-item">Abstract Syntax Tree (AST)</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Code Execution</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Ignition Interpreter</span>
+<span class="t-br">│   │   └──</span> <span class="t-item">Bytecode Execution</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Execution Management</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Execution Context (Global / Function / Eval)</span>
+<span class="t-br">│   │   └──</span> <span class="t-item">Call Stack (LIFO)</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Memory Management</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Memory Heap (objects, arrays, functions)</span>
+<span class="t-br">│   │   └──</span> <span class="t-item">Garbage Collector (Generational GC)</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Optimization</span>
+<span class="t-br">│       ├──</span> <span class="t-item">Runtime Feedback (Inline Caches)</span>
+<span class="t-br">│       ├──</span> <span class="t-item">Hot Code Detection</span>
+<span class="t-br">│       ├──</span> <span class="t-item">JIT Compilation → TurboFan</span>
+<span class="t-br">│       └──</span> <span class="t-item">Optimized Machine Code → CPU</span>
+<span class="t-br">│</span>
+<span class="t-br">├── 2.</span> <span class="t-cat">ENVIRONMENT APIs</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Browser Runtime APIs</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">DOM, Timer, Network, Events</span>
+<span class="t-br">│   │   ├──</span> <span class="t-item">Storage, Device/Location</span>
+<span class="t-br">│   │   └──</span> <span class="t-item">Web Workers</span>
+<span class="t-br">│   │</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Node.js Runtime APIs</span>
+<span class="t-br">│       └──</span> <span class="t-item">fs, http, net, process, streams, path, crypto…</span>
+<span class="t-br">│</span>
+<span class="t-br">├── 3.</span> <span class="t-cat">ASYNCHRONOUS QUEUES</span>
+<span class="t-br">│   ├──</span> <span class="t-kw">Microtask Queue</span>  <span class="t-sub">Promise.then / queueMicrotask</span>
+<span class="t-br">│   └──</span> <span class="t-kw">Task Queue</span>       <span class="t-sub">Timers / Events / I/O</span>
+<span class="t-br">│</span>
+<span class="t-br">└── 4.</span> <span class="t-cat">EVENT LOOP</span>
+    <span class="t-br">├──</span> <span class="t-item">Coordinates execution</span>
+    <span class="t-br">├──</span> <span class="t-item">Drains Microtask Queue after every task</span>
+    <span class="t-br">├──</span> <span class="t-item">Selects one Task per loop turn</span>
+    <span class="t-br">└──</span> <span class="t-item">Pushes callbacks to Call Stack</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION 48 ==================== -->
+    <section class="section" id="s48">
+      <div class="section-card color-amber">
+        <div class="section-header">
+          <div class="section-icon">🧠</div>
+          <div class="section-num">48</div>
+          <div class="section-title">Final Mental Model</div>
+        </div>
+        <div class="section-body">
+          <div class="iflow" style="flex-wrap: wrap; margin-bottom: 24px;">
+            <div class="iflow-step" style="color:var(--accent-primary)">Source Code</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Tokens</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">AST</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Bytecode</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Execution Context</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step">Call Stack</div>
+            <div class="iflow-arrow">→</div>
+            <div class="iflow-step" style="color:var(--accent-green)">CPU</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">⚙️</div><div class="api-card-title">JS Engine</div></div>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0">Processes source → AST → bytecode → optimized machine code. Manages execution contexts, call stack, heap, GC.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🌐</div><div class="api-card-title">Environment APIs</div></div>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0">Browser/Node provide external capabilities: DOM, network, timers, file system. These handle async work outside JS.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">📋</div><div class="api-card-title">Queues</div></div>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0">Microtask Queue (Promises) has priority over Task Queue (timers, events). Microtasks fully drain first.</p>
+            </div>
+            <div class="api-card">
+              <div class="api-card-header"><div class="api-card-icon">🔁</div><div class="api-card-title">Event Loop</div></div>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0">Glues everything together. Waits for call stack to be empty, drains microtasks, picks next task. Repeats forever.</p>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <p>
+              <strong>JavaScript source code</strong> is processed into tokens and an AST by the <strong>Lexer and Parser</strong>. The <strong>Ignition interpreter</strong> generates bytecode which executes via <strong>Execution Contexts</strong> managed on the <strong>Call Stack</strong>. Frequently executed code is detected as <strong>hot code</strong> and compiled by <strong>TurboFan</strong> into optimized machine code for CPU execution. Meanwhile, the surrounding <strong>Browser or Node.js environment</strong> provides APIs for external and asynchronous operations whose results are queued as <strong>microtasks</strong> (Promises) or <strong>tasks</strong> (timers, events), and the <strong>Event Loop</strong> coordinates their execution when the call stack is clear.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== WHAT'S NEXT ==================== -->
+    <div class="next-card" id="next">
+      <div class="next-title">
+        <span>🗺</span>
+        What's Next — Building on This Foundation
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">These concepts all live <em>inside the Execution Context</em> branch. Master them in this order:</p>
+      <div class="next-topics">
+        <div class="next-topic">
+          <div class="next-topic-icon">🔍</div>
+          <div class="next-topic-title">Scope</div>
+          <div class="next-topic-desc">Lexical scope, scope chain, block vs function scope</div>
+        </div>
+        <div class="next-topic">
+          <div class="next-topic-icon">🌍</div>
+          <div class="next-topic-title">Lexical Environment</div>
+          <div class="next-topic-desc">Environment records, outer references, scope chain lookup</div>
+        </div>
+        <div class="next-topic">
+          <div class="next-topic-icon">📦</div>
+          <div class="next-topic-title">Closures</div>
+          <div class="next-topic-desc">Functions remembering their outer scope after EC is gone</div>
+        </div>
+        <div class="next-topic">
+          <div class="next-topic-icon">⬆️</div>
+          <div class="next-topic-title">Hoisting</div>
+          <div class="next-topic-desc">Deep dive into creation phase hoisting behaviour</div>
+        </div>
+        <div class="next-topic">
+          <div class="next-topic-icon">👆</div>
+          <div class="next-topic-title">this Binding</div>
+          <div class="next-topic-desc">Default, implicit, explicit, new, arrow binding rules</div>
+        </div>
+        <div class="next-topic">
+          <div class="next-topic-icon">🤝</div>
+          <div class="next-topic-title">Promises & async/await</div>
+          <div class="next-topic-desc">Async patterns built on the microtask queue</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Back to Top -->
+<a href="#top" class="back-to-top" title="Back to top">↑</a>
+
+<script>
+  // ── Progress Bar ──
+  const progressBar = document.getElementById('progressBar');
+  function updateProgress() {
+    const scrollTop  = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollH    = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const pct        = scrollH > 0 ? (scrollTop / scrollH) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+
+  // ── Active TOC Highlighting ──
+  const sections = document.querySelectorAll('section.section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+  const topbarPills = document.querySelectorAll('.topbar-pill');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+        topbarPills.forEach(p => p.classList.toggle('active', p.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── Copy-to-clipboard on pre click ──
+  document.querySelectorAll('pre').forEach(pre => {
+    pre.style.cursor = 'pointer';
+    pre.title = 'Click to copy';
+    pre.addEventListener('click', () => {
+      const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = pre.style.borderColor;
+        pre.style.borderColor = 'rgba(52,211,153,0.6)';
+        setTimeout(() => pre.style.borderColor = orig, 800);
+      }).catch(() => {});
+    });
+  });
+</script>
+</body>
+</html>

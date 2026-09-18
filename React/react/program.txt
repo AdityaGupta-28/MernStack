@@ -1,0 +1,3503 @@
+Program-1 : Hello World Without Create-react-app
+************************************************
+<html>
+<head>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>at
+    <div id="example"></div>
+    <script>
+        const reactEle = React.createElement('h1', {}, 'My First React App');
+		const domEle = document.getElementById('example');
+        const root = ReactDOM.createRoot(domEle); 
+        root.render(reactEle);
+    </script>
+</body>
+</html>
+Note: React object is available(can be used in console like other objects)
+
+
+
+Program-2 : Nested Element Without Create-react-app
+***************************************************
+<html>
+<head>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <div id="example"></div>
+    <script>
+        const title = React.createElement('h1', {}, 'My First React Code');
+        const paragraph = React.createElement('p', {}, 'Writing some more HTML');
+        const containerDiv = React.createElement('div', {id:myDiv1}, [title, paragraph]);
+		
+        const domEle = document.getElementById('example');
+        const root = ReactDOM.createRoot(domEle); 
+        root.render(containerDiv);
+    </script>
+</body>
+</html>
+
+
+
+Program-3 : Nested Element using JSX (Babel)
+************************************
+<html>
+<head>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="example"></div>
+    <script type="text/babel">
+        const reactEle = <div>
+            <h1>Hello World</h1>
+            <p>This is a paragraph</p>
+            <div>This is a div</div>
+          </div>
+        const domEle = document.getElementById('example');
+
+        const root = ReactDOM.createRoot(domEle);
+        root.render(reactEle)
+    </script>
+</body>
+</html>
+
+
+
+Program-4: use Bootstrap
+************************
+1. install bootstrap	
+   npm i bootstrap	
+2. add below 2 lines to index.js file
+   import 'bootstrap/dist/css/bootstrap.min.css';
+   import "bootstrap/dist/js/bootstrap.bundle.min.js";
+   
+   
+   
+Program-5: use Bootstrap-icons
+******************************
+1. install bootstrap icons library	
+   npm i bootstrap-icons
+2. import bootstrap-icons.css file in to index.js 
+   import 'bootstrap-icons/font/bootstrap-icons.css';
+3. Use class names
+   <i className="bi-alarm"></i>
+   <i className="bi-airplane" style={{ fontSize: "2rem", color: "cornflowerblue" }}></i>
+
+
+
+
+Program-6 : How to use React-icons
+********************************
+1. install react-icons
+   npm install react-icons
+2. import react-icons in component
+   import { FaEdit, FaTrash } from 'react-icons/fa';
+   import { BsFillCalendarDateFill,BsFillClockFill } from 'react-icons/bs';
+3. use the Icons
+   <FaEdit /> 
+   <FaTrash color='red' />
+
+
+
+
+
+Program-7: React Rendering Elements
+*********************************
+export default function tick() {
+  const element = (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>Now The Time is {new Date().toLocaleTimeString()}.</h2>
+    </div>
+  );
+  root.render(element);
+}
+setInterval(tick, 1000);
+
+
+
+Program-8: categories
+*********************
+const categories = [
+  { label: "Fashion", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/fashion.svg" },
+  { label: "Mobiles", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/mobiles.svg" },
+  { label: "Electronics", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/electronics.svg" },
+  { label: "Home", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/home.svg" },
+  { label: "Appliances", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/tv.svg" },
+  { label: "Furnitures", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/furniture.svg" },
+  { label: "Food", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/food.svg" },
+  { label: "2 wheeler", img_url: "https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/auto-new.svg" },
+];
+<div className='container'>
+    <div className="row">
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/fashion.svg" alt="" />
+        <div>Fashion</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/mobiles.svg" alt="" />
+        <div>Mobiles</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/electronics.svg" alt="" />
+        <div>Electronics</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/home.svg" alt="" />
+        <div>Home</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/tv.svg" alt="" />
+        <div>Appliances</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/furniture.svg" alt="" />
+        <div>Furnitures</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/food.svg" alt="" />
+        <div>Food</div>
+      </div>
+      <div className="col">
+        <img src="https://static-assets-web.flixcart.com/apex-static/images/svgs/L1Nav/auto-new.svg" alt="" />
+        <div>2 wheeler</div>
+      </div>
+      <hr/>
+    </div>
+  </div>
+
+
+
+
+program-9: Data Binding
+***********************
+export default function App() {
+  const user = {
+    firstName: "Sanjay",
+    lastName: "Samantra",
+    role: "React Developer",
+    experience: 10,
+    isActive: true,
+  };
+  const formatName = (user) =>
+    `${user.firstName} ${user.lastName}`;
+
+  return (
+    <div>
+      <h2>{formatName(user)}</h2>
+      <p>Role: {user.role}</p>
+      <p>Experience: {user.experience} years</p>
+      <p>Status: {user.isActive ? "Active" : "Inactive"}</p>
+      <p>Senior Developer: {user.experience >= 5 ? "Yes" : "No"}</p>
+      <small>React Version: {React.version}</small>
+    </div>
+  );
+}
+
+
+
+
+
+program-10 display Image
+*************************
+1. place the image inside 'public' folder
+2. use it in HTML file
+   <img src='images/sachin.jpg' />   
+		(OR)
+1. import sachin from './sachin.jpg'; (OR) const sachin = require('./sachin.jpg') 
+2. <img src={sachin} />
+
+
+
+
+program-11 : CSS
+****************
+export default function App() {
+  const myStyle = {color: "blue", backgroundColor: "yellow", border: "5px solid green"};
+  return (
+    <div>
+      Hello World!!!
+      <p style={{ color: "red", fontSize: "42px" }}>
+        this is paragraph
+      </p>
+      <div style={myStyle}>
+        this is a div
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+program-12 CSS Modules
+*********************
+DashedBox.module.css
+-------------------
+.container {
+  margin: 40px;
+  border: 5px dashed pink;
+}
+.content {
+  font-size: 15px;
+  text-align: center;
+}
+.error {
+  color: red;
+}
+
+-------------
+DashedBox2.css
+--------------
+.error{
+	background-color:yellow;
+}
+
+-------------
+import React from 'react';
+import styles from './DashedBox.module.css';
+import './DashedBox2.css';
+
+const DashedBox = () => (
+	console.log(styles)
+    <div className={styles.container}>
+     <p className={styles.content}>Get started with CSS Modules style</p>
+	 <div className={styles.error}>this is a div</div>
+    </div>
+);
+export default DashedBox;
+ 
+
+
+
+Program-13 conditional CSS
+**************************
+export default function Demo1() {
+    let num = 5;
+    let style1 = { color: 'blue' }
+    let style2 = { color: 'red' }
+    return (
+        <>
+		  <div style={num % 2 === 0 ? { color: "green" } : { color: "red" }}>
+			Number {num} is {num % 2 === 0 ? "even" : "odd"}
+		  </div>
+		  <div style={num % 2 === 0 ? style1 : style2}>
+			Number {num} is {num % 2 === 0 ? "even" : "odd"}
+		  </div>
+		  <button className={`btn btn-lg ${num % 2 === 0 ? "btn-success" : "btn-danger"}`}>
+			add a class dynamically
+		  </button>
+		</>
+    )
+}
+
+   
+   
+   
+program-14 : Conditional Operator
+*********************************
+export default function Conditional() {
+  const x = 4;
+  return (
+    <h1>
+      {x % 2 === 0 ? `${x} is Even` : `${x} is Odd`}
+    </h1>
+  );
+}
+
+
+
+
+
+Program-15 : if else
+*******************
+export default function Conditional() {
+  const x = prompt("Enter a number");
+  if (x % 2 === 0) {
+    return <h2>{x} is even</h2>;
+  } else {
+    return <h2>{x} is odd</h2>;
+  }
+}
+
+
+
+
+Program-16 Logical &&
+**********************
+export default function Conditional() {
+  const unreadMessages = ["Hi", "Hello", "Welcome"];
+  return (
+    <div>
+      <h1>Hello!</h1>
+
+      {unreadMessages.length > 0 && (
+        <h2>
+          You have {unreadMessages.length} unread messages.
+        </h2>
+      )}
+    </div>
+  );
+}
+
+
+
+program-17 switch case
+**********************
+import React from "react";
+export default function ConditionalDemo2() {
+  const dayNumber = new Date().getDay();
+  switch (dayNumber) {
+    case 1:
+      return <h3>Today is Monday-{dayNumber}</h3>;
+    case 2:
+      return <h3>Today is Tuesday-{dayNumber}</h3>;
+    case 3:
+      return <h3>Today is Wednesday-{dayNumber}</h3>;
+    case 4:
+      return <h3>Today is Thursday-{dayNumber}</h3>;
+    case 5:
+      return <h3>Today is Friday-{dayNumber}</h3>;
+    case 6:
+      return <h3>Today is Saturday-{dayNumber}</h3>;
+    case 7:
+      return <h3>Today is Sunday-{dayNumber}</h3>;
+    default:
+      return <h3>Not a Valid number</h3>;
+  }
+}
+
+
+
+program-18 List of items
+************************
+export default function App() {
+  const cars = ["tata", "honda", "maruti", "hundai", "toyota"];
+  return (
+    <div>
+      <h2>Car List</h2>
+      <ul>
+        {cars.map((car, index) => (
+          <li key={index}>{car}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+
+
+Program:19 Countries DropDown & Datalist
+**************************************
+export default function ListDemo2() {
+  const countries = ['india' , 'srilanka' , 'Japan', 'singapore' , 'canada']
+  return <>
+    <h2>Countries Dropdown</h2>
+    Dropdown: 
+    <select>
+        {countries.map((country,ind)=>{
+            return <option key={ind}>{country}</option>
+        })}
+    </select>
+    <hr/>
+    datalist:
+    <input list="countries" name="country" id="country" />
+    <datalist id="countries">
+        {countries.map((country,ind)=>{
+            return <option key={ind} value={country} />
+        })}
+    </datalist>
+  </>
+}
+
+
+
+
+ 
+program-20  List of Objects
+**************************
+export default function EmployeeList {
+    let employees = [
+        { eId: 101, name: "sanjay", sal: 5000 },
+        { eId: 104, name: "deepak", sal: 8000 },
+        { eId: 103, name: "ranjan", sal: 7000 },
+        { eId: 102, name: "manoj", sal: 9000 }
+    ]
+    return <table border='1' align='center' width='50%'>
+        {employees.map(emp => (
+            <tr key={emp.eId}>
+                <td>{emp.eId}</td>
+                <td>{emp.name}</td>
+                <td>{emp.sal}</td>
+            </tr>
+        ))}
+    </table>
+}
+
+
+
+
+program-21 : Task List
+***********************
+import { useState } from "react";
+export default function TaskList() {
+  const [tasks, setTasks] = useState([
+    { id: 1, title: "Complete Angular assignment", completed: false },
+    { id: 2, title: "Review pull requests", completed: true },
+    { id: 3, title: "Prepare project report", completed: false },
+    { id: 4, title: "Attend team meeting", completed: true },
+    { id: 5, title: "Update documentation", completed: false }
+  ]);
+  const [filter, setFilter] = useState("All");
+  const toggleTask = (id:number) => {
+    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+  };
+  const filteredTasks = tasks.filter(task =>
+    filter === "Completed" ? task.completed :
+    filter === "Pending" ? !task.completed : true
+  );
+  const completedCount = tasks.filter(task => task.completed).length;
+  return (
+    <div>
+      <h2>Task List</h2>
+      <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+        <option>All</option>
+        <option>Completed</option>
+        <option>Pending</option>
+      </select>
+      <br /><br />
+      {
+        filteredTasks.map(task => (
+          <div key={task.id}>
+            <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task.id)} />
+            <span style={{ textDecoration: task.completed ? "line-through" : "none" }}>
+              {task.title}
+            </span>
+          </div>
+        ))
+      }
+      <h3>{completedCount} out of {tasks.length} tasks are completed</h3>
+    </div>
+  );
+}
+
+
+
+Program-22  asynchronous state & Batch update
+*********************************************
+import { useState } from "react";
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  const increment = () => {
+    setCount(count + 1);
+    console.log(count);
+  };
+  /*const increment = () => {
+    setCount(prevCount => prevCount + 1);
+	// Note: each update receives the latest state value via prevCount
+  };*/
+  const incrementCountFiveTimes = () => {
+    increment();
+    increment();
+    increment();
+    increment();
+    increment();
+  };
+  return (
+    <h2>
+      Counter Works
+      <div>Count - {count}</div>
+      <button className="btn btn-primary m-2" onClick={increment}>
+        Increment
+      </button>
+      <button
+        className="btn btn-primary m-2"
+        onClick={incrementCountFiveTimes}
+      >
+        Increment 5 Times
+      </button>
+    </h2>
+  );
+}
+// Note: All five calls use the same count value from the current render
+
+
+
+Program-23 Show/Hide 
+*********************
+import React, { useState } from 'react';
+export default function Demo() {
+    const [flag, toggleFlag] = useState(true);
+    const toggle = function () {
+        toggleFlag(!flag)
+    }
+    return <div>
+            {flag ? <div>Hellllllo</div> : null}
+            <button onClick={toggle}>
+                {flag ? 'HIDE' : 'SHOW'}
+            </button>
+        </div>
+}
+
+
+
+Program-24 : Show/Hide Password
+*****************************
+import React, { useState } from "react";
+export default function Demo() {
+  const [flag, toggleFlag] = useState(true);
+  const toggle = function () {
+    toggleFlag(!flag);
+  };
+  return (
+    <div>
+      <input type={flag ? "password" : "text"} />
+      <button onClick={toggle}>
+        {flag ? "Show password" : "Hide password"}
+      </button>
+    </div>
+  );
+}
+
+
+
+
+
+Program-25 : Remaining Character
+********************************
+export default function RemainingChar() {
+  const [remaining, setRemaining] = useState(100);
+  const keyUpHandler = (e) => {
+    const msg = e.target.value;
+    setRemaining(100-msg.length)
+  };
+  return <>
+      <textarea onKeyUp={keyUpHandler} maxLength={100} className="m-1"></textarea>
+      <p>remaining char: {remaining}</p>
+    </>
+}
+
+
+
+
+Program-26 : Selected value from dropdown
+*****************************************
+import React, { useState } from 'react'
+export default function StateDropDown() {
+    const stateNames = ['Karnataka', 'Odisha', 'Tamilnadu', 'Kerala', 'Bihar', 'UP'];
+    const [selectedState, setSelectedState] = useState(stateNames[0]);
+    const stateChanged = (e) => {
+        setSelectedState(e.target.value)
+    }
+    return <>
+        <select onChange={stateChanged}>
+            {stateNames.map((state, ind) => {
+                return <option key={ind}>{state}</option>
+            })}
+        </select>
+        <h2>You have Selected -  {selectedState}</h2>
+    </>
+}
+
+
+
+Program-27: Dark/Light Mode
+**************************
+import React, { useEffect, useState } from 'react';
+import './ThemeDemo.css';
+export default function ThemeDemo() {
+    const [isDark, setIsDark] = useState(false);
+    const changeMode = () => {
+        setIsDark(!isDark)
+    }
+    useEffect(() => {
+        if (isDark) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+    }, [isDark])
+
+    return <>
+        <h2>Toggle Dark/Light Mode</h2>
+        <div>This page is in <b>{isDark ? 'Dark' : 'Light'}</b> Mode</div>
+        <button onClick={changeMode}>Go To {!isDark ? 'Dark' : 'Light'} Mode</button>
+    </>
+}
+======
+.dark{
+    background-color:black;
+    color:white 
+}
+
+
+
+
+
+Program-28: Addition 
+********************
+export default function Addition() { 
+  const [num1 ,setNum1] = useState(null);
+  const [num2 ,setNum2] = useState(null);
+  return <>
+    <h3>Add 2 numbers using state variables</h3>
+    <p>Number-1: <input type="number" value={num1} onChange={(e)=>setNum1(e.target.value)} /></p>
+    <p>Number-2: <input type="number" value={num2} onChange={(e)=>setNum2(e.target.value)} /></p>
+    <p>Addition of {num1} and {num2} is {+num1 + +num2}</p>
+  </>
+ }
+
+
+
+
+
+
+
+Program-29 : Search
+*******************
+import React, { useState } from "react";
+import SearchBar from "react-js-search";
+
+export default function EmployeeList() {
+  const initialEmployees = [
+    { number: 12, name: "Buffon", position: "ST", success: true },
+    { number: 21, name: "Pirlo", position: "MC", success: false },
+    { number: 10, name: "Ruiz", position: "MDI" },
+    { number: 7, name: "Nesta", position: "RB", success: true },
+    { number: 4, name: "Cannavaro", position: "CB" },
+    { number: 2, name: "Puyol", position: "CB", success: false },
+    { number: 15, name: "Abate", position: "LB" },
+    { number: 16, name: "Locatelli", position: "MDI" },
+    { number: 1, name: "Buffon", position: "GK" },
+    { number: 21, name: "Pirlo", position: "MC" },
+    { number: 10, name: "Ruiz", position: "MDI" },
+    { number: 7, name: "Nesta", position: "RB" },
+  ];
+
+  const [employees, setEmployees] = useState(initialEmployees);
+  const [filteredEmployees, setFilteredEmployees] = useState(initialEmployees);
+
+  const onSearchClick = (searchText) => {
+    setFilteredEmployees(
+      employees.filter((emp) => JSON.stringify(emp).includes(searchText))
+    );
+  };
+  const onSearchTextChange = (searchText, filteredData) => {
+    setFilteredEmployees(filteredData);
+  };
+  const sortAsc = () => {
+    const sortedData = filteredEmployees.sort((e1, e2) => e1.name.localeCompare(e2.name))
+    setFilteredEmployees([...sortedData]);
+  };
+  const sortDesc = () => {
+    const sortedData = filteredEmployees.sort((e1, e2) => e2.name.localeCompare(e1.name))
+    setFilteredEmployees([...sortedData]);
+  };
+
+  return (
+    <>
+      <SearchBar
+        // onSearchTextChange={onSearchTextChange}
+        onSearchButtonClick={onSearchClick}
+        placeHolderText={"Search here..."}
+        data={employees}
+      />
+      <button onClick={sortAsc}>Asc</button>
+      <button onClick={sortDesc} className='ms-1'>Desc</button>
+      <hr />
+      {
+        <table className="table table-bordered">
+          <tbody>
+            {filteredEmployees.map((emp, ind) => (
+              <tr key={ind}>
+                <td>{emp.number}</td>
+                <td>{emp.name}</td>
+                <td>{emp.position}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      }
+    </>
+  );
+}
+
+
+
+
+Program-30 : Pagination 
+************************
+import React, { useState } from "react";
+import productsArr from "./Products.json";
+import ReactPaginateModule from 'react-paginate' 
+const ReactPaginate = ReactPaginateModule.default || ReactPaginateModule
+import "./ProductsPagination.css";
+
+export default function ProductsPagination() {
+  const [itemOffset, setItemOffset] = useState(0);
+  const itemsPerPage = 4;
+
+  const endOffset = itemOffset + itemsPerPage;
+  console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+  const filteredProducts = productsArr.slice(itemOffset, endOffset);
+  const pageCount = Math.ceil(productsArr.length / itemsPerPage);
+
+  const handlePageClick = (event) => {
+    const newOffset = (event.selected * itemsPerPage) % productsArr.length;
+    console.log(
+      `User requested page number ${event.selected}, which is offset ${newOffset}`
+    );
+    setItemOffset(newOffset);
+  };
+
+  return (
+    <>
+      <h1 className="text-center">Products With Pagination</h1>
+
+      <div className="container">
+        <div className="row">
+          {filteredProducts.map((product) => (
+            <div className="col-sm-3" key={product.id}>
+              <div className="card text-center">
+                <img
+                  src={product.image}
+                  className="card-img-top"
+                  alt="..."
+                  style={{ height: "200px" }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">{product.category}</h5>
+                  <p className="card-text">{product.title}</p>
+                  <p
+                    className="card-text"
+                    style={{ height: "200px", overflow: "scroll" }}
+                  >
+                    {product.description}
+                  </p>
+                  <p className="card-text"> {product.price}</p>
+                  <a href="#" className="btn btn-primary">
+                    BUY NOW
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <ReactPaginate
+        breakLabel="..."
+        nextLabel="next >"
+        onPageChange={handlePageClick}
+        pageRangeDisplayed={5}
+        pageCount={pageCount}
+        previousLabel="< previous"
+        renderOnZeroPageCount={null}
+        containerClassName="pagination"
+        pageLinkClassName="page-num"
+        previousLinkClassName="page-num"
+        nextLinkClassName="page-num"
+        activeLinkClassName="active"
+      />
+    </>
+  );
+}
+
+ProductsPagination.css
+=======================
+.pagination {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  font-size: 16px;
+  gap: 5px;
+}
+.pagination .page-num {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  text-decoration: none;
+}
+.pagination .page-num:hover {
+  background-color: aqua;
+  color: white;
+}
+.pagination .active {
+  background-color: aqua;
+}
+
+
+
+
+
+
+
+Program- react-Select For Search
+***********************************
+import { useState } from "react";
+import Select from "react-select";
+import productsArr from "./product_data.ts";
+
+export default function ProductList() {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const filteredProducts = selectedProduct
+    ? productsArr.filter(product => product.id === selectedProduct.value)
+    : productsArr;
+
+  return (
+    <div className="container mt-3">
+      <h3 className="text-center mb-4">Product List</h3>
+
+      <div className="row mb-4">
+        <div className="col-sm-6 offset-3">
+          <Select
+            placeholder="Search Product..."
+            isClearable
+            value={selectedProduct}
+            onChange={setSelectedProduct}
+            options={productsArr.map(product => ({
+              value: product.id,
+              label: product.title
+            }))}
+          />
+        </div>
+      </div>
+
+      <div className="row">
+        {filteredProducts.map(product => (
+          <div className="col-sm-3 mb-4" key={product.id}>
+            <div className="card h-100">
+              <img src={product.image} className="card-img-top" alt="" height="200"/>
+              <div className="card-body">
+                <p className="text-truncate">{product.category}</p>
+                <p className="text-truncate">{product.title}</p>
+                <p className="text-truncate">{product.description}</p>
+                <p className="text-truncate">₹ {product.price}</p>
+                <p className="text-truncate">Rating : {product.rating.rate}</p>
+                <button className="btn btn-primary">details</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+Program- 43  ToDo CRUD
+**********************
+export default function ToDoCRUD() {
+    let initialtodos = [
+        { id: 1, text: 'To Do 1', completed: true },
+        { id: 2, text: 'To Do 2', completed: false },
+        { id: 3, text: 'To Do 3', completed: true }
+    ]
+    let [todoArr, setToDoArr] = useState(initialtodos);
+
+    let deleteToDo = (id) => {
+        let filteredToDos = todoArr.filter(todo => todo.id !== id);
+        setToDoArr([...filteredToDos]);
+    }
+    let toggleToDo = (id) => {
+        let updatedToDos = todoArr.map(ele => {
+            return ele.id === id ? { ...ele, completed: !ele.completed } : ele;
+        })
+        setToDoArr([...updatedToDos]);
+    }
+    let addToDo = (text) => {
+        let newToDo = { id: todoArr.length + 1, text: text, completed: false };
+        todoArr.push(newToDo);
+        setToDoArr([...todoArr])
+    }
+    return <>
+        <h2 className='text-center'>This is ToDo CRUD Example</h2>
+        <div className='container'>
+            <div className='row'>
+                <div className='col-sm-8'>
+                    <h3 className='text-center'>ToDo List</h3>
+                    <ToDoList todoArr={todoArr} deleteToDo={deleteToDo} toggleToDo={toggleToDo} />
+                </div>
+                <div className='col-sm-4'>
+                    <h3 className='text-center'>Add To Do</h3>
+                    <AddToDo addToDo={addToDo} />
+                </div>
+            </div>
+        </div>
+    </>
+}
+
+
+
+
+
+
+Program-45   Modal 
+******************
+1. npm i react-modal
+2. add the below code
+
+import React, { useState } from 'react';
+import Modal from 'react-modal';
+export default function Test() {
+    const [modalIsOpen, setIsOpen] = React.useState(false);
+
+    function openModal() {
+        setIsOpen(true);
+    }
+    function closeModal() {
+        setIsOpen(false);
+    }
+    return (
+        <div>
+            <button onClick={openModal}>Open Modal</button>
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                contentLabel="Example Modal"
+                shouldCloseOnOverlayClick={false}
+            >
+
+                <button onClick={closeModal}>close</button>
+                <div>I am a modal</div>
+                <div>this is a div</div>
+                <input />
+            </Modal>
+        </div>
+    )
+}
+
+
+
+
+Program-31 : Employee CRUD
+***************************
+import React, { useState } from 'react'
+import EmployeeList from './EmployeeList'
+import AddEmployee from './AddEmployee'
+import EditEmployee from './EditEmployee';
+
+export default function EmployeeCrud() {
+    const initialEmployees = [
+        { eId: 101, name: "sanjay", sal: 5000 },
+        { eId: 104, name: "deepak", sal: 8000 },
+        { eId: 103, name: "ranjan", sal: 7000 },
+        { eId: 102, name: "manoj", sal: 9000 },
+    ];
+    const [employees, setEmployees] = useState(initialEmployees);
+    const [isEdit, setIsEdit] = useState(false);
+    const initialEmp = { eId: '', name: '', sal: 0 }
+    const [selectedEmployee, setSelectedEmployee] = useState(initialEmp);
+
+    const deleteEmployee = (idToDelete) => {
+        let filteredEmployees = employees.filter(emp => emp.eId !== idToDelete);
+        setEmployees([...filteredEmployees])
+    }
+    const addEmployee = (emp) => {
+        employees.push(emp);
+        setEmployees([...employees]);
+    }
+    const editEmployee = (emp) => {
+        setSelectedEmployee(emp);
+        setIsEdit(true);
+    }
+    const saveEditedEmployee = (editedEmp) => {
+        let updatedEmployees = employees.map(emp => {
+            if (emp.eId === editedEmp.eId) {
+                return editedEmp;
+            } else {
+                return emp;
+            }
+        })
+        setEmployees([...updatedEmployees]);
+        setIsEdit(false);
+    }
+    const cancelSave = () => {
+        setSelectedEmployee(initialEmp);
+        setIsEdit(false);
+    }
+
+    return <>
+        <h2 className='text-center'>This is EmployeeCRUD Component</h2>
+        <div className='container'>
+            <div className='row'>
+                <div className='col-sm-8'>
+                    <h3>Employee List</h3>
+                    <EmployeeList
+                        employees={employees}
+                        deleteEmployee={deleteEmployee}
+                        editEmployee={editEmployee}
+                    />
+                </div>
+                <div className='col-sm-4'>
+                    {
+                        isEdit ?
+                            <EditEmployee
+                                selectedEmployee={selectedEmployee}
+                                saveEditedEmployee={saveEditedEmployee} 
+                                cancelSave={cancelSave}
+                                />
+                            :
+                            <AddEmployee addEmployee={addEmployee} />
+                    }
+                </div>
+            </div>
+        </div>
+    </>
+}
+
+------------------------------------------------
+import React from 'react'
+import { useState } from 'react';
+
+export default function EditEmployee({ selectedEmployee, saveEditedEmployee, cancelSave }) {
+    const [emp, setEmp] = useState(selectedEmployee);
+    const changeHandler = (e) => {
+        const { name, value } = e.target;
+        setEmp({ ...emp, [name]: value })
+    }
+    return <>
+        <h3>Edit Employee</h3>
+        <p>eId : <input value={emp.eId} name='eId' onChange={(e) => changeHandler(e)} /></p>
+        <p>Name : <input value={emp.name} name='name' onChange={(e) => changeHandler(e)} /></p>
+        <p>Salary : <input value={emp.sal} name='sal' onChange={(e) => changeHandler(e)} /></p>
+        <div className='text-center'>
+            <button onClick={cancelSave} className='btn btn-secondary mx-1'>Cancel</button>
+            <button onClick={() => saveEditedEmployee(emp)} className='btn btn-primary'>Save</button>
+        </div>
+    </>
+}
+
+------------------------------------------------
+import React, { useState } from 'react'
+
+export default function AddEmployee({ addEmployee }) {
+    const initialEmp = { eId: '', name: '', sal: 0 }
+    const [emp, setEmp] = useState(initialEmp);
+    const changeHandler = (e) => {
+        const { name, value } = e.target;
+        setEmp({ ...emp, [name]: value })
+    }
+    const addMyEmployee = (emp) => {
+        addEmployee(emp);
+        setEmp(initialEmp);
+    }
+    return <>
+        <p>eId : <input value={emp.eId} name='eId' onChange={(e) => changeHandler(e)} /></p>
+        <p>Name : <input value={emp.name} name='name' onChange={(e) => changeHandler(e)} /></p>
+        <p>Salary : <input value={emp.sal} name='sal' onChange={(e) => changeHandler(e)} /></p>
+        <div className='text-center'>
+            <button onClick={() => addMyEmployee(emp)} className='btn btn-primary'>Add Employee</button>
+        </div>
+    </>
+}
+
+
+
+
+
+
+
+Program-32: Pure Component
+**************************
+import React, { Component } from 'react'
+import { PureComponent } from 'react';
+export default class Demo1 extends PureComponent {
+    state = {
+        name: 'sachin'
+    }
+    render() {
+        console.log('Demo1 render called....');
+        setInterval(() => {
+            this.setState({name:'sachin1'})
+        }, 5000)
+        return (
+            <div>
+                This is Demo1 Component {this.state.name}
+            </div>
+        )
+    }
+}
+
+
+
+Program-33: react memo
+**********************
+import React, { useState } from "react";
+import Demo2 from "../demo2/Demo2";
+
+export default function Demo() {
+  const [counter, setCounter] = useState(0);
+  const [cars, setCars] = useState(["tata", "honda", "maruti"]);
+  return (
+    
+function Demo2(props) {
+  console.log("demo-2 render called");
+  return (
+    <div>
+      Demo2
+      {props.cars.map((car) => {
+        return <li>{car}</li>;
+      })}
+    </div>
+  );
+}
+export default React.memo(Demo2);
+
+
+
+program-34: useEffect hook
+**************************
+export default function UseEffectDemo1() {
+    const [a, setA] = useState(10);
+    const [b, setB] = useState(20);
+    const [c, setC] = useState(30);
+
+    useEffect(() => {
+        console.log("use effect called");
+    }, [a, b]);
+    return <>
+        <div>Demo</div>
+        <div>a:{a}  b:{b}  c:{c}</div>
+
+        <button onClick={() => setA(15)}>update A</button>
+        <button onClick={() => setB(25)} className="mx-2">update B</button>
+        <button onClick={() => setC(35)}>update C</button>
+    </>
+}
+
+
+
+
+Program-35: DigitalClock using UseEffect() 
+**************************************
+import { useEffect, useState } from "react";
+export default function DigitalClock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    console.log("Component is initialized, plz add logic");
+    const timerId = setInterval(() => {
+      console.log("I am set interval");
+      setTime(new Date());
+    }, 1000);
+    return () => {
+      console.log("Component is about to be destroyed, plz clean everything");
+      clearInterval(timerId);
+    };
+  }, []);
+
+  return <h2>{time.toLocaleTimeString()}</h2>;
+}
+
+
+
+
+Program-36 : UserDetails using UseEffect() 
+**************************************
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+export default function UserDetails() {
+  const [userId, setUserId] = useState(1);
+  const [user, setUser] = useState(null);
+  const fetUserDetails = async()=>{
+    let response = await axios.get(`https://jsonplaceholder.typicode.com/users/${userId}`);
+    setUser(response.data);
+  }
+  useEffect(()=>{
+    console.log('Use Effect Called....')
+    fetUserDetails();
+  },[userId]); 
+  return (
+    <>
+      <h3 className="text-center">User Details For User: {userId}</h3>
+      <select value={userId} onChange={(e)=>setUserId(+e.target.value)}>
+        <option value={1}>User 1</option>
+        <option value={2}>User 2</option>
+        <option value={3}>User 3</option>
+      </select>
+      <div className="card h-100 col-sm-3">
+        <div className="card-body">
+          <p>{user?.id}</p>
+          <p>{user?.name}</p>
+          <p>{user?.phone}</p>
+          <p>{user?.email}</p>
+          <p>{user?.address?.city}</p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+
+
+
+Program-37: How to get prev state and props 
+******************************************
+export default function CounterDemo3() {
+    let [counter, updateCounter] = useState(0);
+    let prevValue = useRef(0);
+
+    let increment = () => {
+        updateCounter(counter + 1);
+    }
+    useEffect(() => {
+        prevValue.current = counter;
+    }, [counter]);
+    return <>
+        <p>Current value - {counter} , previous Value is-{prevValue.current}</p>
+        <button onClick={increment}>Increment</button>
+    </>
+}
+
+
+
+
+program-38 : Addition using refs
+*******************************
+export default function Addition() {
+  const inputRef1 = useRef<HTMLInputElement>(null)
+  const inputRef2 = useRef<HTMLInputElement>(null)
+  const addition = () => {
+    const val1 = +(inputRef1.current?.value || 0);
+    const val2 = +(inputRef2.current?.value || 0);
+    console.log(`Addition of ${val1} and ${val2} is ${val1 + val2}`);
+  };
+  return <div>
+      num1: <input ref={inputRef1} />
+      num2: <input ref={inputRef2} />
+      <button onClick={addition}>Add</button>
+    </div>
+}
+
+
+
+
+program-39: call back refs
+*************************
+export default function Addition() {
+  let inputRef1;
+  let inputRef2;
+  const add = () => {
+    const val1 = +inputRef1.value;
+    const val2 = +inputRef2.value;
+    alert(val1 + val2);
+  };
+  return (
+    <div>
+      Num 1: <input ref={(input) => (inputRef1 = input)} />
+      Num 2: <input ref={(input) => (inputRef2 = input)} />
+      <button onClick={add}>Add</button>
+    </div>
+  );
+}
+
+
+
+program-40: Ref Forwarding
+***************************
+import { useRef } from "react";
+function App() {
+  const inputRef = useRef();
+  const focusInput = () => {
+    inputRef.current.focus();
+  };
+  return (
+    <>
+      <MyInput ref={inputRef} />
+      <button onClick={focusInput}>
+        Focus Input
+      </button>
+    </>
+  );
+}
+----------------
+function MyInput({ ref }) {
+  return <input ref={ref} placeholder="Enter name" />;
+}
+
+
+
+
+program-41: Focus using useLayoutEffect
+*************************************
+import { useLayoutEffect, useRef } from "react";
+function App() {
+  const inputRef = useRef();
+  useLayoutEffect(() => {
+    inputRef.current.focus();
+  }, []);
+  return <input ref={inputRef} placeholder="Search..." />;
+}
+
+
+
+program-42: Product Search with useMemo
+*************************************
+import { useMemo, useState } from 'react';
+import products from '../list/product_data';
+
+export default function ProductSearch() {
+  const [count, setCount] = useState(0);
+  const [query, setQuery] = useState('');
+
+  const filteredProducts = useMemo(() => {
+    console.log('Filtering products data...');
+    return products.filter(product =>
+      product.description.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
+  
+  /* const filteredProducts = products.filter(product =>{
+      console.log('Filtering products data...');
+      return product.description.toLowerCase().includes(query.toLowerCase())
+   }); */
+  return (
+    <>
+      <h3 className="text-center">Product List with Search Functionality</h3>
+      <div className="row">
+        <div className="col-sm-6">
+          <input value={query} onChange={e => setQuery(e.target.value)} type="search" placeholder="Search by category..." className="form-control" />
+          <p>Searched Text: <strong>{query}</strong></p>
+          <p>Products Found: <strong>{filteredProducts.length}</strong></p>
+        </div>
+        <div className="col-sm-2">
+          <p>Count: {count} &nbsp;
+            <button onClick={() => setCount(count + 1)}>Increment</button>
+          </p>
+        </div>
+      </div>
+      <div className="row">
+        {filteredProducts.map(product => (
+          <div className="col-3 my-2" key={product.id}>
+            <div className="card">
+              <img src={product.image} className="card-img-top" alt={product.title} height={250} />
+              <div className="card-body text-center">
+                <h5 className="card-title">{product.category}</h5>
+                <p className="card-text text-truncate">{product.title}</p>
+                <p className="card-text text-truncate">{product.description}</p>
+                <p className="card-text">Rs {product.price}</p>
+                <p className="card-text">{product.rating.rate} ⭐</p>
+                <a href="#" className="btn btn-primary">Details</a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+
+
+
+
+
+
+Program-43: Search Filter with Deferred Value  (useState, useDeferredValue, useMemo)
+============================================
+import { useState, useDeferredValue, useMemo } from "react";
+const ITEMS = Array.from({ length: 10000 }, (_, i) => `Item ${i + 1}`);
+
+export default function SearchFilter() {
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
+
+  const filtered = useMemo(() => {
+    return ITEMS.filter(i =>
+      i.toLowerCase().includes(deferredQuery.toLowerCase())
+    );
+  }, [deferredQuery]);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Search Filter</h2>
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Type to search"
+      />
+      <p>Showing {filtered.length} results</p>
+      <ul>
+        {filtered.slice(0, 20).map(i => (
+          <li key={i}>{i}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+
+
+program-44: Form Submit
+**********************
+import React, { useState } from "react";
+
+export default function Demo() {
+  const [fname, setFname] = useState("sachin");
+  const [lname, setLname] = useState("tendulkar");
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    alert(fname+' '+lname);
+  };
+
+  return (
+    <>
+      <form onSubmit={submitHandler}>
+        First Name:
+        <input name="fname" value={fname} onChange={(e) => setFname(e.target.value)} />
+        Last Name:
+        <input name="lname" value={lname} onChange={(e) => setLname(e.target.value)} />
+        <br />
+        <br />
+        <button>submit</button>
+      </form>
+    </>
+  );
+}
+
+
+
+
+Program-45: Login form
+*********************
+export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log("Login submitted");
+    };
+    return <>
+        <form onSubmit={handleSubmit} className="col-sm-3 offset-3">
+            <div className="mb-3">
+                <label>Email</label>
+                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="mb-3">
+                <label>Password</label>
+                <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <button className="btn btn-primary">Login</button>
+        </form>
+        <pre>
+            Email: {email} <br/>
+            Password: {password}
+        </pre>
+    </>
+}
+
+
+
+
+
+Program-46: UnControlled Form Elements
+*************************************
+import React, { useState } from 'react'
+import { useRef } from 'react';
+
+export default function FormDemo2() {
+    let myRef1 = useRef('')
+    let myRef2 = useRef('')
+    const submitHandler = (e) => {
+        e.preventDefault();
+        const fname = myRef1.current.value;
+        const lname = myRef2.current.value;
+        console.log(fname, lname)
+    }
+    return <form onSubmit={submitHandler}>
+        First Name:
+        <input name="fname" defaultValue={'Sachin'} ref={myRef1} />
+        Last Name:
+        <input name="lname" defaultValue={'Tendulkar'} ref={myRef2} />
+        <br /><br />
+        <button>submit</button>
+    </form>
+}
+
+
+
+Program-47: form data in an object
+*********************************
+import { useState } from "react";
+
+export default function FormDemo1() {
+  const defaultUserData = {
+    firstName: "Sanjay",
+    lastName: "",
+    email: "",
+    salary: 0,
+    phone: 0,
+  };
+  const [user, setUser] = useState(defaultUserData);
+
+  const changeHandler = (e:any)=>{
+    setUser({...user , [e.target.name]:e.target.value})
+  }
+  const submitMyForm = (e:any)=>{
+    e.preventDefault();
+    console.log('Form Submitted', user)
+  }
+  const resetMyForm = ()=>{
+    setUser({...defaultUserData});
+  }
+  return (
+    <>
+      <div className="col-sm-4 offset-4 border border-3 rounded-3 p-3">
+        <h3>Form</h3>
+
+        <form onSubmit={submitMyForm} onReset={resetMyForm}>
+          <p>
+            FirstName: <input name='firstName' value={user.firstName} onChange={changeHandler} />
+          </p>
+          <p>
+            lastName: <input name='lastName' value={user.lastName} onChange={changeHandler} />
+          </p>
+          <p>
+            Email: <input name='email' value={user.email} onChange={changeHandler} />
+          </p>
+          <p>
+            Salary: <input name='salary' value={user.salary} onChange={changeHandler} />
+          </p>
+          <p>
+            Phone: <input name='phone' value={user.phone} onChange={changeHandler} />
+          </p>
+
+          <input type="reset" value="Reset" />
+          <input type="submit" value="Submit" />
+        </form>
+
+      </div>
+    <pre>{JSON.stringify(user)}</pre>
+    </>
+  );
+}
+
+
+
+program-48: Form Validation while typing
+*****************************************
+import { useState } from "react";
+
+export default function FormDemo1() {
+  const defaultUserData = {
+    firstName: "Sanjay",
+    lastName: "samantr",
+    email: "",
+    salary: "",
+    phone: "",
+  };
+
+  const defaultErrors = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    salary: "",
+    phone: "",
+  };
+
+  const [user, setUser] = useState(defaultUserData);
+  const [errors, setErrors] = useState(defaultErrors);
+
+  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fieldName = e.target.name;
+    const fieldValue = e.target.value;
+
+    setUser({ ...user, [fieldName]: fieldValue });
+
+    setErrors({
+      ...errors,
+      [fieldName]:fieldValue.trim() === "" ? `${fieldName} is required`: "",
+    });
+  };
+
+  const submitMyForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Submitted", user);
+  };
+
+  const resetMyForm = () => {
+    setUser(defaultUserData);
+    setErrors(defaultErrors);
+  };
+
+  return (
+    <>
+      <div className="col-sm-4 offset-4 border border-3 rounded-3 p-3">
+        <h3>Form</h3>
+
+        <form onSubmit={submitMyForm} onReset={resetMyForm}>
+          <p>
+            FirstName: <input name="firstName" value={user.firstName} onChange={changeHandler} />
+            <span className="text-danger">{errors.firstName}</span>
+          </p>
+          <p>
+            LastName: <input name="lastName" value={user.lastName} onChange={changeHandler} />
+            <span className="text-danger">{errors.lastName}</span>
+          </p>
+          <p>
+            Email: <input name="email" type="email" value={user.email} onChange={changeHandler} />
+            <span className="text-danger">{errors.email}</span>
+          </p>
+          <p>
+            Salary: <input name="salary" value={user.salary} onChange={changeHandler} />
+            <span className="text-danger">{errors.salary}</span>
+          </p>
+          <p>
+            Phone: <input name="phone" value={user.phone} onChange={changeHandler} />
+            <span className="text-danger">{errors.phone}</span>
+          </p>
+          <input type="reset" value="Reset" />
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
+
+      <pre>{JSON.stringify(user, null, 2)}</pre>
+      <pre>{JSON.stringify(errors, null, 2)}</pre>
+    </>
+  );
+}
+
+
+
+
+
+Program-49: Controlled Form Example
+********************************
+import React, { useState } from 'react'
+export default function FormDemo2() {
+    const defaultFormValues = {
+        name: '',
+        age: '',
+        gender: '',
+        dob: '',
+        interests: [],
+        country: '',
+        bio: ''
+    }
+    const [formData, setFormData] = useState(defaultFormValues);
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        console.log(formData);
+    }
+    const handleReset = () => {
+        setFormData(defaultFormValues);
+    }
+    const isFormValid = formData.name !== '' && formData.age !== '';
+    const handleChange = (event) => {
+        const { name, value, type, checked } = event.target;
+
+        if (type === 'checkbox') {
+            if (checked) {
+                setFormData({ ...formData, interests: [...formData.interests, value] });
+            } else {
+                setFormData({
+                    ...formData,
+                    interests: [...formData.interests.filter(interest => interest !== value)]
+                });
+            }
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    }
+    return <>
+        <h3 className='text-center'>React Controlled Form</h3>
+        <div className='container'>
+            <div className='row'>
+                <div className='col-sm-6 offset-sm-3'>
+                    <div className='border border-3 rounded-3 p-2 m-2'>
+                        <form onSubmit={handleSubmit}>
+                            <p>
+                                <label>Name:</label>
+                                <input name='name' value={formData.name} onChange={handleChange} required></input>
+                            </p>
+                            <p>
+                                <label>Age:</label>
+                                <input name='age' value={formData.age} onChange={handleChange}></input>
+                            </p>
+                            <p>
+                                <label>Gender:</label>
+                                <input name='gender' type='radio'
+                                    value='male' checked={formData.gender === 'male'}
+                                    onChange={handleChange} /> Male
+                                <input name='gender' type='radio'
+                                    value='female' checked={formData.gender === 'female'}
+                                    onChange={handleChange} /> female
+                            </p>
+                            <p>
+                                <label>DOB:</label>
+                                <input name='dob' type='date'
+                                    value={formData.dob} onChange={handleChange} />
+                            </p>
+                            <p>
+                                <label>Interests:</label>
+                                <input name='interests' type='checkbox'
+                                    value='reading' checked={formData.interests.includes('reading')}
+                                    onChange={handleChange} />Reading
+
+                                <input name='interests' type='checkbox'
+                                    value='swimimg' checked={formData.interests.includes('swimimg')}
+                                    onChange={handleChange} />Swimimg
+                            </p>
+                            <p>
+                                <label>Country:</label>
+                                <select name='country' value={formData.country} onChange={handleChange}>
+                                    <option value=''>Select a Country</option>
+                                    <option value='india'>India</option>
+                                    <option value='usa'>USA</option>
+                                    <option value='srilanka'>Srilanka</option>
+                                    <option value='canada'>Canada</option>
+                                    <option value='mexico'>Mexico</option>
+                                </select>
+                            </p>
+                            <p>
+                                <label>Bio:</label>
+                                <textarea rows='2' cols='30' name='bio'
+                                    value={formData.bio} onChange={handleChange}>
+
+                                </textarea>
+                            </p>
+                            <input type='reset' value='Clear' className='mx-2 btn btn-danger'
+                                onClick={handleReset} />
+                            <input type='submit' value='Submit' className='btn btn-primary' disabled={!isFormValid} />
+                        </form>
+
+                        <pre>
+                            {JSON.stringify(formData,null,4)}
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </>
+}
+
+
+
+
+Program-50 : Formik & Yup
+*************************
+import React, { useState } from 'react';
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+const initialFormValue = {
+    name: "", email: "", password: "", confirmPassword: "",
+    gender: "", role: "", skills: [], acceptTerms: false
+}
+const skillsList = ["JavaScript", "React", "Node.js", "Python"];
+const validationSchema = Yup.object({
+    name: Yup.string().required("Name is required"),
+    email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+    password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+    confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), null], "Passwords must match")
+        .required("Confirm password is required"),
+    gender: Yup.string().required("Gender is required"),
+    role: Yup.string().required("Role is required"),
+    skills: Yup.array().min(1, "Select at least one skill"),
+    acceptTerms: Yup.boolean().oneOf([true], "You must accept the terms"),
+});
+
+export default function FormDemo3() {
+    const [formData, setFormData] = useState(null);
+
+    return <>
+        <h3 className='text-center'>React Form Using Formik & Yup</h3>
+        <div className='col-sm-6 offset-sm-3'>
+            <div className='border border-3 rounded-3 p-2 m-2'>
+                <Formik
+                    initialValues={initialFormValue}
+                    validationSchema={validationSchema}
+                    onSubmit={(values, { resetForm }) => {
+                        setFormData(values);
+                        resetForm();
+                    }}
+                >
+                    {({ values, isSubmitting }) => (
+                        <Form>
+                            <div className='my-1'>
+                                <label>Name:</label>
+                                <Field name="name" type="text" />
+                                <div className="text-danger"><ErrorMessage name="name" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Email:</label>
+                                <Field name="email" type="email" />
+                                <div className="text-danger"><ErrorMessage name="email" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Password:</label>
+                                <Field name="password" type="password" />
+                                <div className="text-danger"><ErrorMessage name="password" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Confirm Password:</label>
+                                <Field name="confirmPassword" type="password" />
+                                <div className="text-danger"><ErrorMessage name="confirmPassword" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Gender:</label>
+                                <Field as="select" name="gender">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </Field>
+                                <div className="text-danger"><ErrorMessage name="gender" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Role:</label>
+                                <label>
+                                    <Field type="radio" name="role" value="developer" />
+                                    Developer
+                                </label>
+                                <label>
+                                    <Field type="radio" name="role" value="designer" />
+                                    Designer
+                                </label>
+                                <div className="text-danger"><ErrorMessage name="role" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>Skills:</label>
+                                {skillsList.map((skill) => (
+                                    <label key={skill} style={{ display: "block" }}>
+                                        <Field
+                                            type="checkbox"
+                                            name="skills"
+                                            value={skill}
+                                        />
+                                        {skill}
+                                    </label>
+                                ))}
+                                <div className="text-danger"><ErrorMessage name="skills" /></div>
+                            </div>
+                            <div className='my-1'>
+                                <label>
+                                    <Field type="checkbox" name="acceptTerms" />
+                                    I accept the terms and conditions
+                                </label>
+                                <div className="text-danger"><ErrorMessage name="acceptTerms" /></div>
+                            </div>
+                            <button type="submit" disabled={isSubmitting} style={{ marginTop: "10px" }}>
+                                Submit
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
+                {formData && (
+                    <div style={{ marginTop: "20px", background: "#f9f9f9", padding: "15px" }}>
+                        <h3>Submitted Data:</h3>
+                        <pre>{JSON.stringify(formData, null, 2)}</pre>
+                    </div>
+                )}
+            </div>
+        </div>
+    </>
+}
+
+
+
+
+Program-51: Fetch() Example
+****************************
+import React, { useEffect, useState } from "react";
+export default function Comments() {
+  const [comments, setComments] = useState([]);
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/comments")
+      .then((response) => response.json())
+      .then((result) => {
+        setComments(result);
+      });
+  });
+  return (
+    <>
+      <h1>Comment List</h1>
+
+      <table className="table table-bordered">
+        {comments.map((comment) => (
+          <tr key={comment.id}>
+            <td>{comment.id}</td>
+            <td>{comment.name}</td>
+            <td>{comment.email}</td>
+            <td>{comment.body}</td>
+          </tr>
+        ))}
+      </table>
+    </>
+  );
+}
+
+
+
+
+
+
+Program-52: Http CRUD
+**********************
+import { useEffect, useState } from "react";
+
+const URL = "http://localhost:3000/employees";
+
+export default function EmployeeCrud() {
+  const [employees, setEmployees] = useState([]);
+  const [employee, setEmployee] = useState({
+    name: "", salary: "", department: ""
+  });
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+  const fetchEmployees = async () => {
+    const response = await fetch(URL);
+    setEmployees(await response.json());
+  };
+  const addEmployee = async () => {
+    if (!employee.name) return;
+    await fetch(URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(employee)
+    });
+    setEmployee({ name: "", salary: "", department: "" });
+    fetchEmployees();
+  };
+  const deleteEmployee = async (id) => {
+    await fetch(`${URL}/${id}`, { method: "DELETE" });
+    fetchEmployees();
+  };
+  const viewEmployee = (emp) => {
+    alert(`ID: ${emp.id}
+	Name: ${emp.name}
+	Salary: ${emp.salary}
+	Department: ${emp.department}`);
+  };
+  return (
+    <div className="container mt-3">
+      <h2>Employee CRUD</h2>
+
+      <div className="mb-3">
+        <input className="form-control mb-2" placeholder="Name"
+          value={employee.name}
+          onChange={(e) => setEmployee({ ...employee, name: e.target.value })} />
+
+        <input className="form-control mb-2" placeholder="Salary"
+          value={employee.salary}
+          onChange={(e) => setEmployee({ ...employee, salary: e.target.value })} />
+
+        <input className="form-control mb-2" placeholder="Department"
+          value={employee.department}
+          onChange={(e) => setEmployee({ ...employee, department: e.target.value })} />
+
+        <button className="btn btn-success" onClick={addEmployee}>
+          Add Employee
+        </button>
+      </div>
+      <table className="table table-bordered">
+        <thead>
+          <tr>
+            <th>Id</th><th>Name</th><th>Salary</th>
+            <th>Department</th><th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {employees.map((emp) => (
+            <tr key={emp.id}>
+              <td>{emp.id}</td><td>{emp.name}</td><td>{emp.salary}</td>
+              <td>{emp.department}</td>
+              <td>
+                <button className="btn btn-info btn-sm me-2"
+                  onClick={() => viewEmployee(emp)}>
+                  View
+                </button>
+
+                <button className="btn btn-danger btn-sm"
+                  onClick={() => deleteEmployee(emp.id)}>
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
+
+
+Program-53: useActionState
+****************************
+const [message, submitAction, isPending] = useActionState(
+  async (prev, formData) => {
+    const name = formData.get("name");
+    return `Hello ${name}`;
+  },
+  ""
+);
+
+<form action={submitAction}>
+  <input name="name" />
+  <button disabled={isPending}>Submit</button>
+  <p>{message}</p>
+</form>
+
+
+
+Program-54: Auth Interceptor
+****************************
+export function authInterceptor(request) {
+    console.log('Auth interceptor called...')
+    // const token = localStorage.getItem('accessToken');
+    const token = 'ABCDEF-123456'; // token received from backend during login
+    if (token) {
+        request.headers.Authorization = `bearer ${token}`;
+    }
+    return request;
+}
+client.interceptors.request.use(authInterceptor)
+
+
+
+Program-55: Error Interceptor
+******************************
+export function errorHandler(error) {
+    console.log('Error Interceptor called...')
+    const status = error.response?.status;
+    if (status === 401) {
+        window.location.assign('/login');
+    }
+    if (status === 403) {
+        console.error('You do not have Permission for this action')
+    } else if (status >= 500) {
+        console.error('Server Error, Please try again later.')
+    } else if (status >= 500) {
+        console.error('Server Error, Please try again later.')
+    } else if (!error.response) {
+        console.error('Network Error or Request timed out')
+    }
+    return Promise.reject(error);
+}
+client.interceptors.response.use(response=>response , errorHandler);
+
+
+
+Program-56: Retry Interceptor
+******************************
+import client from "./client";
+export async function retry(error) {
+    const config = error.config;
+    config.retryCount = config.retryCount || 0;
+    const isServerError = error.response?.status >= 500;
+    const isNetworkError = !error.response;
+    // if ((isServerError || isNetworkError) && config.retryCount < 2) {
+    if (config.retryCount < 2) {
+        config.retryCount++;
+        // wait 1 sec before trying again
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return client(config)
+    }
+    return Promise.reject(error);
+}
+
+client.interceptors.response.use(response=>response , retry);
+
+
+
+
+
+program-58: without HOC
+**********************
+import { useState } from "react";
+export default function ClickCounter() {
+ const [count, setCount] = useState(0);
+  const increment = () => {
+    setCount(count + 1);
+  };  
+  return <>
+      <h2>In Click Counter Component - count is {count}</h2>
+      <button onClick={increment}>Click me</button>
+    </>
+}
+
+------------------------------------------------
+import { useState } from "react";
+export default function HoverCounter() {
+  const [count, setCount] = useState(0);
+  const increment = () => {
+    setCount(count + 1);
+  };
+  return <>
+      <h2>In HoverCounter Component - count is {count}</h2>
+      <button onMouseEnter={increment}>Click me</button>
+    </>
+}
+
+
+
+Program-59: With HOC
+*********************
+withcounter.js
+--------------
+import React, { useState } from "react";
+const UpdatedComponent = (OriginalComponent) => {
+  function CounterHOC() {
+    const [count, setCount] = useState(0);
+    const increment = () => {
+      setCount(count + 1);
+    };
+    return <OriginalComponent count={count} increment={increment} />;
+  }
+  return CounterHOC;
+};
+export default UpdatedComponent;
+
+
+
+clickCounter.js
+---------------
+import React from "react";
+import CounterHOC from "./CounterHOC";
+function ClickCounterWithHOC(props) {
+  return (
+    <button onClick={props.increment}> Clicked {props.count} Times</button>
+  );
+}
+export default CounterHOC(ClickCounterWithHOC);
+
+
+hovercounter.js
+--------------
+import React from "react";
+import CounterHOC from "./CounterHOC";
+function HoverCounterWithHOC(props) {
+  return (
+    <button onMouseOver={props.increment}> Clicked {props.count} Times</button>
+  );
+}
+export default CounterHOC(HoverCounterWithHOC);
+
+
+
+Program-60: Logging using HOC
+******************************
+export default function WithLogger(InputComponent) {
+    return function EnhancedComponent(props) {
+        useEffect(() => {
+            console.log(`Component ${InputComponent.name} mounted.`);
+            return () => {
+                console.log(`Component ${InputComponent.name} unmounted.`);
+            };
+        }, []);
+        useEffect(() => {
+            console.log(`Component ${InputComponent.name} updated.`);
+        });
+        console.log(`${InputComponent.name} rendered`);
+        return <InputComponent {...props} />;
+    };
+}
+
+
+
+
+
+program-61: Routing
+******************
+index.js
+------
+import { BrowserRouter } from 'react-router-dom';	
+   <BrowserRouter>
+        <App />
+   </BrowserRouter>	
+	
+	
+body.js
+---------
+import { Route, Routes } from "react-router";
+<Routes>
+      <Route exact path="/" element={<Home />} />
+      <Route exact path="/home" element={<Home />} />
+      <Route exact path="/aboutus" element={<Aboutus />} />
+      <Route exact path="/careers" element={<Careers />} />
+      <Route exact path="/products" element={<Products />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+
+
+nav.js
+------
+<ul class="nav navbar-nav">
+	<li class="active"> 
+		<Link to="/products">Product</Link>
+	</li>
+    <li>
+		<Link to="/greet">greet</Link>
+	</li>                    
+	<li>
+		<Link to="/http">http</Link>
+	</li>
+	<li>
+		<Link to="/parent">parent</Link>
+	</li>
+</ul>
+
+
+
+
+program-62: Path param
+**********************
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+function UserDetail() {
+  const { id } = useParams();
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    fetch(`https://jsonplaceholder.typicode.com/users/${id}`)
+      .then((res) => res.json())
+      .then((data) => setUser(data));
+  }, [id]);
+  if (!user) {
+    return <h3>Loading User...</h3>;
+  }
+  return (
+    <>
+      <h2>User Details</h2>
+      <p>Id: {user.id}</p>
+      <p>Name: {user.name}</p>
+      <p>Email: {user.email}</p>
+      <p>Phone: {user.phone}</p>
+    </>
+  );
+}
+export default UserDetail;
+
+
+
+program-63: Protected Route
+***************************
+<Route exact path="/careers" element={
+          <ProtectedRoute>
+            <Careers></Careers>
+          </ProtectedRoute>
+        } />		
+---------------------------------------------------
+import React from "react";
+import { Navigate } from "react-router-dom";
+export default function ProtectedRoute({ children }) {
+  const role = "student";
+  if (role === "student") {
+      alert('you are not allowed to go to this route')
+      return <Navigate to="/home" replace />;
+  }
+  return children;
+}
+
+
+
+Lazy Loading
+============
+const ProductList = React.lazy(() => import("./components/list/product_list"));
+
+<Suspense fallback={<h1>Loading...</h1>}>
+    <Routes>
+        <Route exact path="products" element={<ProductList />} />
+    </Routes>
+</Suspense>
+
+
+
+
+
+program-64 custom Hook
+***********************
+fetchHook.js
+------------
+import React, { useEffect, useState } from "react";
+
+export default function useFetch(url) {
+  const [data, setData] = useState([]);
+  
+  useEffect(async () => {
+    const response = await fetch(url);
+    const data = await response.json();
+    setData(data);
+  }, []);
+
+  return data;
+}
+
+
+test.js
+-------
+import React, { useState, useEffect } from 'react'
+import useFetch from '../customhook/fetchHook';
+
+export default function Test() {
+    let users = useFetch('https://jsonplaceholder.typicode.com/users')
+    return (
+        <div>
+            <table className='table table-bordered table-striped table-responsive'>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>name</th>
+                        <th>email</th>
+                        <th>phone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {users.map((user, ind) => {
+                        return (
+                            <tr>
+                                <td>{user.id}</td>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                                <td>{user.phone}</td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+
+program-65: Context Example
+**************************
+UserContext.js
+--------------
+import { createContext, useState } from "react";
+export const UserContext = createContext();
+export const UserProvider = ({ children }) => {
+    const [user, setUser] = useState({ name: 'Guest' });
+    const setLoggedinUser = (name) => {
+        setUser({ name })
+    }
+    return <UserContext.Provider value={{ user, setLoggedinUser }}>
+        {children}
+    </UserContext.Provider>
+}
+
+ThemeContext.js
+---------------
+import { createContext, useState } from "react";
+export const ThemeContext = createContext();
+export const ThemeProvider = ({ children }) => {
+    const [theme, setTheme] = useState('light');
+    const toggleTheme = () => {
+        setTheme((prev) => {
+            return prev === 'light' ? 'dark' : 'light';
+        })
+    }
+    return <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        {children}
+    </ThemeContext.Provider>
+}
+
+-Wrap the component with Context Providers
+	 <ThemeProvider>
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </ThemeProvider>
+
+-Consume the data from Context (DashBoard.js)
+
+import React, { useContext } from "react";
+import { ThemeContext } from "./ThemeContext";
+import { UserContext } from "./UserContext";
+const Dashboard = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { user, setLoggedinUser } = useContext(UserContext);
+  return <div style={{ padding: 20, background: theme === "light" ? "#fff" : "#333", color: theme === "light" ? "#000" : "#fff" }}>
+            <h2>Welcome, {user.name}</h2>
+            <h2>Current Theme : {theme}</h2>
+            <button onClick={() => setLoggedinUser("John Doe")}>Login as John Doe</button>
+            <br /><br />
+            <button onClick={toggleTheme}>Toggle Theme</button>
+        </div>
+};
+export default Dashboard;
+
+
+
+
+Program-66: Redux Counter WithOut @reduxjs/toolkit
+**************************************************
+1. create a new project 
+   npx create-react-app counter-app
+   
+2. install redux & react-redux
+   npm install redux react-redux @reduxjs/toolkit
+
+3. Create Folders & Files for actions, reducers, store and components
+    store-->store.js
+	actions-->actions.js
+	reducers-->reducers.js
+	components-->counter.js
+	
+4. Create Actions (actions.js)
+    export const increment = () => { // Action Creator function
+		return { type: 'INCREMENT' } // action object
+	}
+	export const decrement = () => {
+		return { type: 'DECREMENT' } 
+	}
+	export const reset = () => { 
+		return { type: 'RESET' } 
+	}
+
+5. Add Reducer Code 
+	const counterReducer = (state = 1, action) => {
+	  switch (action.type) {
+		case "INCREMENT":
+		  return state + 1;
+		case "DECREMENT":
+		  return state - 1;
+		case "RESET":
+		  return (state = 0);
+		default:
+		  return state;
+	  }
+	};
+	export default counterReducer;
+	
+6. create Store (store.js)   
+    import { configureStore } from '@reduxjs/toolkit';
+	import counterReducer from '../reducers/counter_reducer';
+	const myStore = configureStore({
+		reducer: {
+			counter: counterReducer
+		}
+	});
+	export default myStore;
+
+	
+7. Provide Store (index.js)
+	import { Provider } from 'react-redux';	
+	import mystore from './store/store'
+	
+	const root = ReactDOM.createRoot(document.getElementById("root"));
+	root.render(
+	  <React.StrictMode>
+		<Provider store={mystore}>
+		  <App />
+		</Provider>
+	  </React.StrictMode>
+	);
+
+8. Import and Dispatch the Actions(Counter.js)
+
+	import { useDispatch, useSelector } from 'react-redux';
+	import { decrement, increment, reset } from '../actions/actions'
+	export default function Counter() {
+		const count = useSelector((state) => state.counter)
+		const dispatch = useDispatch();
+		return <>
+			<h3 className='text-center'>Counter Example Using REDUX</h3>
+			<div className='col-md-4 offset-md-4'>
+				<div className='m-3 p-3 border border-3 rounded-3 text-center'>
+					<h4>Count is: {count}</h4>
+
+					<button class="btn btn-secondary" onClick={() => dispatch(decrement())}>Decrement</button>
+					<button class="btn btn-danger mx-2" onClick={() => dispatch(reset())}>Reset</button >
+					<button class="btn btn-primary" onClick={() => dispatch(increment())}> Increment</button >
+				</div>
+			</div >
+		</>
+	}
+
+
+
+
+
+Program-67: Redux Counter With @reduxjs/toolkit
+**********************************************
+1. install below packages
+   npm install react-redux @reduxjs/toolkit
+   
+2. Create a Slice (features/counter/counterSlice.ts)
+    import { createSlice } from "@reduxjs/toolkit";
+	const initialState = 0;
+	const counterSlice = createSlice({ // Slice = actions + reducers
+	  name: "counter",
+	  initialState,
+	  reducers: {
+		increment: (state) => {
+		  return state + 1;
+		},
+		decrement: (state) => {
+		  return state - 1;
+		},
+		reset: (state) => {
+		  return 0;
+		},
+	  },
+	});
+
+export const { increment, decrement, reset } = counterSlice.actions;
+export default counterSlice.reducer;
+
+   
+3. create Redux Store (store/store.ts)
+    import { configureStore } from "@reduxjs/toolkit";
+	import counterReducer from "../features/counter/counterSlice";
+	export const store = configureStore({
+	  reducer: {
+		counter: counterReducer,
+	  },
+	});
+
+
+4. Provide the Store to React (main.tsx / index.jsx)
+	import { Provider } from "react-redux";
+	import { myStore } from "./store/store.ts";
+   <Provider store={myStore}>
+       <App />
+   </Provider>
+
+
+5. Add Counter Component
+import { useDispatch, useSelector } from "react-redux";
+import { increment,decrement, reset } from "../../features/counter/counterSlice";
+
+export default function CounterWithRedux() {
+  const count = useSelector((state: any) => state.counter); // Selector
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      <h2>Counter With Redux</h2>
+      <h3>Count:{count}</h3>
+
+      <button onClick={()=>{dispatch(decrement())}} >decrement</button>
+      <button onClick={()=>{dispatch(reset())}} className="mx-1">Reset</button>
+      <button onClick={()=>{dispatch(increment())}}>increment</button>
+    </>
+  );
+}
+
+
+
+
+
+
+Program-68: Redux ToDo example
+******************************
+1. create a new project 
+   npx create-react-app <projectName>
+   
+2. install react-redux And @reduxjs/toolkit
+   npm install @reduxjs/toolkit react-redux
+
+3. Create Folders & Files for actions, reducers, store and components
+     store-->store.js
+	 features/todo --> todoSlice.js
+	 components--> ToDoList.js , ToDo.js, AddToDo.js 
+	 
+4. Create a Redux "slice" reducer with createSlice , Export the generated slice reducer and action creators	
+
+	import { createSlice } from '@reduxjs/toolkit';
+	const initialState = {
+		todoList: [
+			{ id: 1, text: "Learn React", isCompleted: false },
+			{ id: 2, text: "Complete Java Assignments", isCompleted: true },
+		]
+	}
+	// slice = reducers + action_creators
+	export const todoSlice = createSlice({
+		name: 'todo',
+		initialState,
+		reducers: {
+			addToDo: {
+				reducer: (state, action) => {
+					state.todoList.push(action.payload);
+				},
+				prepare: (text) => ({
+					payload: {
+						id: Math.random() * 20,
+						text,
+						completed: false,
+					}
+				})
+			},
+			deleteToDo: (state, action) => {
+				state.todoList = state.todoList.filter(todo => todo.id !== action.payload);
+				return state;
+			},
+			toggleToDo: (state, action) => {
+				state.todoList = state.todoList.map((toDo) =>
+					toDo.id === action.payload ? { ...toDo, isCompleted: !toDo.isCompleted } : toDo
+				);
+				return state;
+			}
+		}
+	})
+	// Action creators are generated for each case reducer function
+	export const { addToDo, deleteToDo, toggleToDo } = todoSlice.actions; // Action Creators
+	export default todoSlice.reducer;
+   
+   
+5. Create/Update Redux Store
+    import { configureStore } from '@reduxjs/toolkit';
+	import todoReducer from "../features/todo/todoSlice";
+	export const store = configureStore({
+		reducer: {todoReducer:todoReducer}
+	})
+
+6. Provide the Redux Store to React(index.js/main.tsx)
+    <Provider store={myStore}>
+      <App />
+    </Provider>
+   
+   
+7. Read data from the store with the useSelector hook (ToDoList.js)
+    import { useSelector } from 'react-redux'
+	import ToDo from './ToDo';
+	import AddToDo from './AddToDo';
+	export default function ToDoList() {
+		const todoArr = useSelector((state) => state.todoReducer.todoList);
+		const CompletedToDos = todoArr.filter(todo => todo.isCompleted);
+		return <>
+			<div className='col-sm-4 offset-4'>
+				<div className='p-3 m-3 border border-3 rounded-3'>
+					<h2 className='text-center'>ToDo List Using REDUX</h2>
+					<hr />
+					<AddToDo />
+					<hr/>
+					{todoArr.map((todoObj, ind) => {
+						return <ToDo todoObj={todoObj} ind={ind} />
+					})}
+					<hr />
+					{CompletedToDos.length}/{todoArr.length} are completed
+				</div>
+			</div>
+		</>
+	}
+
+
+9. ToDo.js
+	import { useDispatch } from 'react-redux'
+	import { deleteToDo, toggleToDo } from '../../features/todo/todoSlice';
+	
+	export default function ToDo({ todoObj }) {
+		const dispatch = useDispatch();
+		const deleteMyTodo = (id) => {
+			const actionObj = deleteToDo(id);
+			dispatch(actionObj)
+		}
+		const toggleMyTodo = (id) => {
+			const actionObj = toggleToDo(id);
+			dispatch(actionObj)
+		}
+		return <>
+			<li>
+				<span style={{ textDecoration: todoObj.isCompleted ? 'line-through' : 'none' }}>
+					{todoObj.text}
+				</span> &nbsp;
+				<button onClick={() => { deleteMyTodo(todoObj.id) }}>DELETE</button> &nbsp;
+				<button onClick={() => { toggleMyTodo(todoObj.id) }}>TOGGLE</button> &nbsp;
+			</li>
+		</>
+	}
+
+
+10. AddToDo.js
+	import React, { useRef } from 'react'
+	import { useDispatch } from 'react-redux';
+	import { addToDo } from '../features/todo/todoSlice';
+	export default function AddToDo() {
+		const dispatch = useDispatch();
+		const myRef1 = useRef();
+		const addNewToDo = () => {
+			const actionObj = addToDo(myRef1.current.value);
+			dispatch(actionObj);
+			myRef1.current.value = '';
+		};
+		return <>
+			<input ref={myRef1} /> &nbsp;
+			<button onClick={addNewToDo}>Add New ToDo</button>
+		</>
+	}
+
+
+
+
+
+Program-69: useReducer hook
+***************************
+import React, { useReducer, useRef } from "react";
+const initialTodos = [
+  { id: 1, title: "Todo 1", complete: false },
+  { id: 2, title: "Todo 2", complete: true },
+];
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "ADD":
+      return [...state, action.payload];
+    case "DELETE":
+      return state.filter((todo) => todo.id !== action.id);
+    case "TOGGLE":
+      return state.map((todo) => {
+        if (todo.id === action.id) {
+          return { ...todo, complete: !todo.complete };
+        } else {
+          return todo;
+        }
+      });
+    default:
+      return state;
+  }
+};
+
+let nextTodoId = 3;
+export default function UseReducerDemo() {
+  const [todos, dispatch] = useReducer(reducer, initialTodos);
+  const myref1 = useRef();
+
+  const addNewTodo = (title) => {
+    const actionObj = {
+      type: "ADD",
+      payload: {
+        id: nextTodoId++,
+        title: title,
+        complete: false,
+      },
+    };
+    dispatch(actionObj);
+  };
+  const handleComplete = (todo) => {
+    dispatch({ type: "TOGGLE", id: todo.id });
+  };
+  const deleteTodo = (id) => {
+    dispatch({ type: "DELETE", id: id });
+  };
+  return (
+    <>
+      <h3>Add ToDo</h3>
+      <input ref={myref1} />
+      <button onClick={() => addNewTodo(myref1.current.value)}>Add todo</button>
+      <hr />
+      {todos.map((todo) => (
+        <div key={todo.id}>
+          <label>
+            <input
+              type="checkbox"
+              checked={todo.complete}
+              onChange={() => handleComplete(todo)}
+            />
+            <span
+              style={{
+                textDecoration: todo.complete ? "line-through" : "none",
+              }}
+            >
+              {todo.title}
+              <button onClick={() => deleteTodo(todo.id)}>DELETE</button>
+            </span>
+          </label>
+        </div>
+      ))}
+    </>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+Program-70: Usememo  and  search
+**************************************
+import { useState, useMemo } from "react";
+
+export default function UseMemoTest() {
+  const [searchText, setSearchText] = useState("")
+  const [count, setCount] = useState(0);
+
+  const products = ["Laptop", "Mobile", "Keyboard", "Mouse", "Monitor", "Headphones", "Tablet"];
+  
+  const filteredProducts = useMemo(() => {
+    console.log("Filtering products...");
+    return products.filter(product => product.toLowerCase().includes(searchText.toLowerCase()));
+  }, [searchText]);
+
+  /* const filteredProducts = products.filter((product) => {
+    console.log("filtering...");
+    return product.toLowerCase().includes(searchText.toLowerCase());
+  }); */
+
+  return (
+    <div>
+      <h2>Product Search</h2>
+      <input className="mx-2" type="text" placeholder="Search product..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+      <button onClick={() => setCount(count + 1)}>Counter: {count}</button>
+      <ul>
+        {filteredProducts.map((product, index) => (
+          <li key={index}>{product}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
+
+
+Program-71: Error Boundary
+*************************
+import React, { Component } from 'react';
+export default class MyErrorBoundry extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    static getDerivedStateFromError(error) {
+        // Update state so the next render will show the fallback UI.
+        return { hasError: true };
+    }
+    componentDidCatch(error, errorInfo) {
+        // You can also log the error to an error reporting service
+        // logErrorToMyService(error, errorInfo);
+    }
+    render() {
+        if (this.state.hasError) {
+            return <h2>Something went wrong, Component cann't be loaded </h2>
+        } else {
+            // Normally, just render children
+            return this.props.children;
+        }
+    }
+}
+
+
+import React, { Component } from 'react'
+export class BuggyCounter extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { counter: 0 };
+    }
+    increment = () => {
+        this.setState({ counter: this.state.counter + 1 });
+    }
+    render() {
+        if (this.state.counter === 5) {
+            // Simulate a JS error
+            throw new Error('I crashed!');
+        }
+        return <>
+            <h1>Count is : {this.state.counter}</h1>
+            <button onClick={this.increment}>Increment</button>
+        </>
+    }
+}
+
+
+function Test() {
+  return (
+    <div>
+      <p>
+        <b>
+          This is an example of error boundaries in React 16.
+          <br /><br />
+          Click on the numbers to increase the counters.
+          <br />
+          The counter is programmed to throw when it reaches 5. This simulates a JavaScript error in a component.
+        </b>
+      </p>
+      <hr />
+      <ErrorBoundary>
+        <p>These two counters are inside the same error boundary. If one crashes, the error boundary will replace both of them.</p>
+        <BuggyCounter />
+        <BuggyCounter />
+      </ErrorBoundary>
+      <hr />
+      <p>These two counters are each inside of their own error boundary. So if one crashes, the other is not affected.</p>
+      <ErrorBoundary><BuggyCounter /></ErrorBoundary>
+      <ErrorBoundary><BuggyCounter /></ErrorBoundary>
+    </div>
+  );
+}
+
+
+Program-72:  Portals
+*************************
+1. add target div in index.html
+   <div id="modal-root"></div> <!--Root Element for Portal-->
+   
+2. Create a Portal Component
+   import React from 'react';
+	import ReactDOM from 'react-dom';
+	const styles = {
+		overlay: {
+			position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+			backgroundColor: "rgba(0, 0, 0, 0.5)",
+			display: "flex", justifyContent: "center", alignItems: "center"
+		},
+		modal: {
+			background: '#fff', padding: '20px', borderRadius: '5px'
+		}
+	}
+	export default function MyModal({ children }) {
+		return ReactDOM.createPortal(
+			<div style={styles.overlay}>
+				<div style={styles.modal}>
+					{children}
+				</div>
+			</div>,
+			document.getElementById('modal-root')
+		)
+	}
+	
+3. Use the Portal Component in a parent component
+    import { useState } from 'react';
+	import MyModal from './components/MyModal';
+	function App() {
+	  const [showModal, setShowModal] = useState(false);
+	  return <>
+		<h1>Let's Learn Portals</h1>
+		<button className='btn btn-primary' onClick={() => setShowModal(true)}>Open Modal</button>
+		{showModal &&
+		  <MyModal>
+			<h2>This is a Modal</h2>
+			<button className='btn btn-primary' onClick={() => setShowModal(false)}>Close Modal</button>
+		  </MyModal>
+		}
+	  </>
+	}
+	export default App;
+
+
+
+Program-73:  Unit testing
+**************************
+import { render, screen, waitFor } from '@testing-library/react';
+import UserList from '../components/users/UserList';
+const MockUserList = [
+    {
+        id: 1, userName: 'sanjay_kumar', name: 'sanjay',
+        email: 'sanjay@gmail.com', phone: 1234512345,
+        address: { city: 'bangalore' }
+    }
+]
+// Mock fetch()
+beforeEach(() => {
+    global.fetch = jest.fn(() => {
+        return Promise.resolve({
+            json: () => Promise.resolve(MockUserList)
+        })
+    });
+})
+afterEach(() => {
+    jest.clearAllMocks();
+});
+describe('Test Suite For Http Demo 2 Component', () => {
+    it('Lets Verify fetchUser functionality', async () => {
+        render(<UserList />);
+        // wait for user data to be displayed on the screen
+        await waitFor(() => {
+            expect(screen.getByText('sanjay')).toBeInTheDocument();
+        });
+        expect(global.fetch).toHaveBeenCalledWith('https://jsonplaceholder.typicode.com/users');
+    })
+})
+
+
+Unit Testing Axios Code
+========================
+// UserService.js
+import axios from "axios";
+const API = "/api/users";
+export const getUsers = () => axios.get(API);
+export const createUser = (user) => axios.post(API, user);
+export const updateUser = (id, user) => axios.put(`${API}/${id}`, user);
+export const deleteUser = (id) => axios.delete(`${API}/${id}`);
+
+-----------------------------------------------
+
+import axios from "axios";
+import * as UserService from "./UserService";
+
+// Automatically mock axios
+jest.mock("axios");
+
+describe("UserService API calls", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("getUsers should fetch users", async () => {
+    const mockData = [{ id: 1, name: "Alice" }];
+    axios.get.mockResolvedValueOnce({ data: mockData });
+
+    const response = await UserService.getUsers();
+    expect(response.data).toEqual(mockData);
+    expect(axios.get).toHaveBeenCalledWith("/api/users");
+  });
+
+  test("createUser should post user data", async () => {
+    const newUser = { name: "Bob" };
+    axios.post.mockResolvedValueOnce({ data: { id: 2, ...newUser } });
+
+    const response = await UserService.createUser(newUser);
+    expect(response.data).toEqual({ id: 2, name: "Bob" });
+    expect(axios.post).toHaveBeenCalledWith("/api/users", newUser);
+  });
+
+  test("updateUser should send updated data", async () => {
+    const updatedUser = { name: "Updated Alice" };
+    axios.put.mockResolvedValueOnce({ data: updatedUser });
+
+    const response = await UserService.updateUser(1, updatedUser);
+    expect(response.data).toEqual(updatedUser);
+    expect(axios.put).toHaveBeenCalledWith("/api/users/1", updatedUser);
+  });
+
+  test("deleteUser should send delete request", async () => {
+    axios.delete.mockResolvedValueOnce({ status: 204 });
+
+    const response = await UserService.deleteUser(1);
+    expect(response.status).toBe(204);
+    expect(axios.delete).toHaveBeenCalledWith("/api/users/1");
+  });
+  
+  test("getUsers should handle errors", async () => {
+	  axios.get.mockRejectedValueOnce(new Error("Network error"));
+	  await expect(UserService.getUsers()).rejects.toThrow("Network error");
+  });
+
+});
+
+
+
+
+Program-74: graphQL
+**********************
+1. install apollo-client and graphQL
+   npm install @apollo/client graphql
+   
+2. Initialize ApolloClient (index.js)
+    import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';	
+    const client = new ApolloClient({
+	  uri: 'http://localhost:5000/',
+	  cache: new InMemoryCache()
+	});
+
+3. Connect your Apollo-client to React / Set Up ApolloProvider
+  <ApolloProvider client={client}>
+    <App />
+  </ApolloProvider>
+  
+4. Fetch data with useQuery
+   import { gql, useQuery } from '@apollo/client';
+   
+   const GET_COMMENTS_QUERY = gql`
+    query comments {
+      comments {
+        id
+        name
+		email
+      }
+    }
+  `;
+   const { loading, error, data } = useQuery(GET_COMMENTS_QUERY);
+   
+   
+   
+   
+
+
+Design Question-1 : Star Rating
+*********************************
+import { useState } from "react";
+export default function StarRating() {
+    const [rating, setRating] = useState(0);
+    const [hover, setHover] = useState(0);
+    return <div className="text-center mt-5">
+        <h5>Rate this product</h5>
+        <div>
+            {[1, 2, 3, 4, 5].map(star => (
+                <span
+                    key={star}
+                    className={star <= (hover || rating)
+                        ? "text-warning"
+                        : "text-secondary"}
+                    style={{ fontSize: 38, cursor: "pointer" }}
+                    onMouseEnter={() => setHover(star)}
+                    onMouseLeave={() => setHover(0)}
+                    onClick={() => setRating(star)}
+                >
+                    ★
+                </span>
+            ))}
+        </div>
+        <div className="text-muted mt-1">
+            {rating ? `${rating} / 5` : "Click to rate"}
+        </div>
+    </div>
+}
+
+
+Design Question-2 : Folder Explorer
+************************************
+import React, { useState } from "react";
+export default function Folder({ folderInfo }) {
+    const [expand, setExpand] = useState(false);
+
+    if (folderInfo.isFolder) { // if folder
+        return <div>
+            <span onClick={() => setExpand(!expand)} style={{ cursor: 'pointer' }}>
+                📁
+                {folderInfo.name}
+                <br />
+            </span>
+            <div
+                style={{ display: expand ? "block" : "none", paddingLeft: "20px" }}
+            >
+                {folderInfo.items.map((subfolderInfo, ind) => (
+                    <Folder folderInfo={subfolderInfo} key={ind} />
+                ))}
+            </div>
+        </div>
+    } else { // if file
+        return <span>
+            🏢
+            {folderInfo.name} <br />
+        </span>
+
+    }
+}
+
+
+
+
+Design Question-3 : Autocomplete
+*********************************
+import { useEffect, useState } from "react";
+const countries = [
+    "India", "Indonesia", "Ireland", "Iceland", "Australia", "Austria",
+    "Argentina", "Brazil", "Belgium", "Canada", "China", "Chile",
+    "Denmark", "Egypt", "France", "Germany", "Greece", "Japan",
+    "Mexico", "Nepal", "Netherlands", "Singapore", "South Africa",
+    "Spain", "United Kingdom", "United States"
+];
+export default function Autocomplete() {
+    const [search, setSearch] = useState(""), [suggestions, setSuggestions] = useState([]);
+    useEffect(() => {
+        const timer = setTimeout(() =>
+            setSuggestions(search ? countries.filter(c =>
+                c.toLowerCase().includes(search.toLowerCase())) : []), 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+    return (
+        <div className="w-50 mx-auto mt-5">
+            <input className="form-control" placeholder="Search country..."
+                value={search} onChange={e => setSearch(e.target.value)} />
+            {suggestions.length > 0 && <ul className="list-group">
+                {suggestions.map(country =>
+                    <li key={country} className="list-group-item"
+                        onClick={() => { setSearch(country); setSuggestions([]); }}>
+                        {country}
+                    </li>
+                )}
+            </ul>}
+        </div>
+    );
+}
+
+
+
+Design Question-4 : Traffic Light
+*********************************
+import React, { useEffect, useState } from 'react';
+import './TrafficLight.css';
+
+const config = {
+    red: { backgroundColor: 'red', duration: 4000, next: 'green' },
+    yellow: { backgroundColor: 'yellow', duration: 1000, next: 'red' },
+    green: { backgroundColor: 'green', duration: 3000, next: 'yellow' }
+};
+export default function TrafficLight() {
+    const [currentColor, setCurrentColor] = useState('green');
+
+    useEffect(() => {
+        const { duration, next } = config[currentColor];
+        const timerId = setTimeout(() => {
+            setCurrentColor(next);
+        }, duration);
+        return () => {
+            clearTimeout(timerId);
+        };
+    }, [currentColor]);
+
+    return <div className="wrapper">
+        <div className='traffic-light-container traffic-light-container--vertical'>
+            {Object.keys(config).map((color) => (
+                <div key={color} className="traffic-light"
+                    style={{
+                        backgroundColor: color === currentColor
+                            ? config[color].backgroundColor
+                            : ''
+                    }}
+                />
+            ))}
+        </div>
+    </div>
+}
+-------------------------
+.wrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+}
+.traffic-light-container {
+    background-color: #000;
+    border-radius: 8px;
+    display: flex;
+    padding: 8px;
+    gap: 8px;
+}
+.traffic-light-container--vertical {
+    flex-direction: column;
+}
+.traffic-light {
+    --size: 50px;
+    background-color: #555;
+    border-radius: var(--size);
+    height: var(--size);
+    width: var(--size);
+}
+
+
+
+
+Design Question-5 : Shopping Cart
+*********************************
+import { useState } from "react";
+const products = [
+    { id: 1, name: "Laptop", price: 60000 },
+    { id: 2, name: "Phone", price: 30000 },
+    { id: 3, name: "Headphones", price: 5000 }
+];
+export default function ShoppingCart() {
+    const [cart, setCart] = useState([]);
+    const add = p => setCart(c => {
+        const item = c.find(x => x.id === p.id);
+        return item
+            ? c.map(x => x.id === p.id ? { ...x, qty: x.qty + 1 } : x)
+            : [...c, { ...p, qty: 1 }];
+    });
+    const remove = id => setCart(c => c.filter(x => x.id !== id));
+    const qty = (id, n) =>
+        setCart(c => c.map(x => x.id === id ? { ...x, qty: x.qty + n } : x));
+
+    const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+    return <div className="container mt-4">
+        <h3>🛒 Shopping Cart</h3>
+        <div className="row">
+            <div className="col-md-7">
+                <h5>Products</h5>
+                {products.map(p => (
+                    <div className="card p-3 mb-2" key={p.id}>
+                        <div className="d-flex justify-content-between">
+                            <span><b>{p.name}</b> — ₹{p.price}</span>
+                            <button className="btn btn-primary btn-sm"
+                                onClick={() => add(p)}>Add</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="col-md-5">
+                <div className="card p-3">
+                    <h5>Cart</h5>
+                    {cart.map(x => (
+                        <div className="d-flex justify-content-between border-bottom py-2"
+                            key={x.id}>
+                            <span>{x.name} — ₹{x.price * x.qty}</span>
+                            <span>
+                                <button className="btn btn-sm btn-light"
+                                    onClick={() => x.qty > 1 && qty(x.id, -1)}>−</button>
+                                <b className="mx-2">{x.qty}</b>
+                                <button className="btn btn-sm btn-light"
+                                    onClick={() => qty(x.id, 1)}>+</button>
+                                <button className="btn btn-sm btn-danger ms-2"
+                                    onClick={() => remove(x.id)}>Remove</button>
+                            </span>
+                        </div>
+                    ))}
+                    <h5 className="mt-3">Total: ₹{total}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+Design Question-6 : OTP Handling
+********************************
+import { useRef, useState } from "react";
+export default function OTP() {
+  const length = 6;
+  let arr = Array(length).fill("");
+  const [otp, setOtp] = useState(arr);
+  const inputRefs = useRef([]);
+
+  const handleChange = (e, index) => {
+    const digit = e.target.value.replace(/\D/g, "").slice(-1);
+    const updatedOtp = [...otp];
+    updatedOtp[index] = digit;
+    setOtp(updatedOtp);
+    if (digit && index < length - 1) 
+        inputRefs.current[index + 1]?.focus();
+    if (updatedOtp.join("").length === length)
+      console.log("OTP:", updatedOtp.join(""));
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (otp[index]) {
+        const updatedOtp = [...otp];
+        updatedOtp[index] = "";
+        setOtp(updatedOtp);
+      } else if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+    if (e.key === "ArrowLeft" && index > 0)
+      inputRefs.current[index - 1]?.focus();
+    if (e.key === "ArrowRight" && index < length - 1)
+      inputRefs.current[index + 1]?.focus();
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const value = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
+    if (!value) return;
+    const updatedOtp = [...value].concat(Array(length).fill("")).slice(0, length);
+    setOtp(updatedOtp);
+    inputRefs.current[Math.min(value.length, length - 1)]?.focus();
+    if (value.length === length) console.log("OTP:", value);
+  };
+
+  return (
+    <div style={styles.wrapper}>
+      <h2>Enter OTP</h2>
+
+      <div style={styles.otpContainer}>
+        {otp.map((digit, index) => 
+            <input key={index} ref={el => inputRefs.current[index] = el} type="text" 
+            inputMode="numeric" maxLength={1} value={digit} 
+            onChange={e => handleChange(e, index)} onKeyDown={e => handleKeyDown(e, index)} 
+            onPaste={handlePaste} onFocus={e => e.target.select()} style={styles.input} />)}
+      </div>
+
+      <button onClick={() => {
+        const value = otp.join("");
+        value.length === length ? console.log("Verifying OTP:", value) : alert("Please enter complete OTP");
+      }}>
+        Verify OTP
+      </button>
+    </div>
+  );
+}
+
+const styles = {
+  wrapper: { textAlign: "center", padding: "40px" },
+  otpContainer: { display: "flex", justifyContent: "center", gap: "10px", margin: "20px 0" },
+  input: { width: "45px", height: "50px", fontSize: "22px", textAlign: "center", border: "1px solid #ccc", borderRadius: "8px", outline: "none" }
+};
+
+
+
+
+Design Question-7 : Virtualized List
+************************************
+Virtualized List — Steps
+1. Create employee data.
+2. Create a fixed-height, scrollable container and define row height.
+3. Track the first visible row using scroll position.
+4. Get only visible employees using slice().
+5. Create the full virtual height for the scrollbar.
+6. Render and position only the visible rows.
+7. Verify that only visible rows are rendered in the DOM.
+--------------------------------
+import { useState } from "react";
+
+const employees = Array.from({ length: 1000 }, (_, i) => ({
+    id: 1001 + i,
+    name: ["Sanjay", "Deepak", "Ranjan", "Manoj", "Rahul"][i % 5],
+    role: ["Developer", "Manager", "Tester", "Designer"][i % 4],
+    department: ["IT", "HR", "Finance", "Sales"][i % 4],
+    salary: 40000 + (i % 6) * 10000
+}));
+
+export default function EmployeeList() {
+    const [start, setStart] = useState(0);
+    const visible = employees.slice(start, start + 10);
+    return (
+        <div className="container mt-4">
+            <h3>Employee List</h3>
+            <div
+                className="border"
+                style={{ height: 350, overflow: "auto" }}
+                onScroll={e => setStart(Math.floor(e.target.scrollTop / 45))}
+            >
+                <div style={{ height: employees.length * 45, position: "relative" }}>
+                    {visible.map((emp, i) => (
+                        <div
+                            key={emp.id}
+                            className="d-flex border-bottom px-3 align-items-center"
+                            style={{
+                                height: 45,
+                                position: "absolute",
+                                top: (start + i) * 45,
+                                width: "100%"
+                            }}
+                        >
+                            <div style={{ width: "10%" }}>{emp.id}</div>
+                            <div style={{ width: "20%" }}>{emp.name}</div>
+                            <div style={{ width: "20%" }}>{emp.role}</div>
+                            <div style={{ width: "20%" }}>{emp.department}</div>
+                            <div style={{ width: "20%" }}>₹{emp.salary}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
