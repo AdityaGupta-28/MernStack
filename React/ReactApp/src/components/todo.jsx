@@ -3,27 +3,44 @@ import React, {useState} from 'react'
 
 function ToDoList(){
  const [tasks, setTasks ] = useState([]);
- const [task, setTask] = useState("");
+ const [newTask, setNewTask] = useState("");
 
  function handleChange(e){
-  setTask(e.target.value);
+  setNewTask(e.target.value);
  }
 
-const input =document.getElementsByTagName('input');
-input.addEventListener("keydown",function(e){
-  if(e.key==='Enter'){
-    e.preventDefault();
-    handleChange();
-  } 
-});
 
  function handleAdd(e){
-    setTasks(t=>([...t,task]));
-    setTask("");
+   if(newTask.trim()!==""){
+    setTasks(t=>([...t,newTask]));
+    setNewTask("");
+   }
  }
 
  function handleRemove(index){
-    setTasks(taks.filter((_,ind)=>ind!==index));
+    setTasks(tasks.filter((_,ind)=>ind!==index));
+ }
+
+ function handleUp(index){
+   if(index>0){
+   const updatedTasks = [...tasks];
+   [updatedTasks[index], updatedTasks[index-1]] = [updatedTasks[index-1], updatedTasks[index]];
+   setTasks(updatedTasks);
+   }
+ }
+
+ function handleDown(index){
+   if(index<tasks.length-1){
+      const updatedTasks = [...tasks];
+      [updatedTasks[index], updatedTasks[index+1]] = [updatedTasks[index+1], updatedTasks[index]];
+      setTasks(updatedTasks);
+   }
+ }
+
+ function handleKeyDown(e){
+   if(e.key==='Enter'){
+      handleAdd(e);
+   }
  }
 
     return(
@@ -31,12 +48,12 @@ input.addEventListener("keydown",function(e){
         <h1>ToDo List</h1>
       
         <div className='input'>
-       <input type="text" value={task} onChange={handleChange}  placeholder='Enter task'  />
+       <input type="text" value={newTask} onChange={handleChange} onKeyDown={handleKeyDown}  placeholder='Enter task'  />
        <button onClick={handleAdd} >Add</button>
        </div>
         <div className='list' >
-        {tasks.map((task,index)=><p key='index' >{task} <button onClick={()=>handleRemove(index)} >Delete</button> 
-        <button >up</button> <button>down</button></p>)}
+        {tasks.map((task,index)=><p key={index} >{task} <button onClick={()=>handleRemove(index)} >Delete</button> 
+        <button onClick={()=>handleUp(index)} >up</button> <button onClick={()=>handleDown(index)} >down</button></p>)}
        </div>
        
         </div>

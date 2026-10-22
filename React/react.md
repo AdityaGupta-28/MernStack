@@ -409,7 +409,7 @@ function handleModelChange(e){
 export default Car;
 
 
-        //  ############## Update  array using useState 
+ ##       //  ############## Update  array using useState 
 import React,{useState} from 'react';
 function Food(){
     const [foods, setFood] = useState(['Apple','Orange','Banana','Cherry']);
@@ -504,3 +504,107 @@ function Cars(){
 }
 export default Cars;
 
+
+##                     <!-- ################ useEffect react hook  -->
+
+   useEffect = React Hook that tells React DO SOME CODE WHEN (pick one) :
+This component re-renders
+This component mounts
+The state of a value changes
+
+useEffect(function,[dependencies])   // Runs after every re-render
+ useEffect(()=>{},[])                // Runs only on mount
+ useEffect(()=>{},[value])          // Runs on mount + when value changes
+
+<!-- USES  -->
+#1  Event Listeners
+#2  DOM manipulation
+#3  Subscriptions (real-time updates)
+#4  Fetching Data from an API
+#5  Clean up when a component
+
+## Example 1 
+import React,{useState, useEffect} from 'react'
+
+function UseEffectt(){
+    const [count,setCount] = useState(0);
+    const [color,setColor] = useState('green');
+    useEffect(()=>{document.title=`count: ${count}`},[color]); // if dependency array is empty then only once the function is called
+               /// if dependency array is absent then whenever the page re-renders the function is called (mount)
+               /// if dependency array is present with value then whenever the values changes then the function called; (mount + value)
+    function add(){
+        setCount(c=>c+1);
+    }
+
+    function changeColor(){
+        setColor(c=>c==='green'?'red':'green');
+    }
+    return(
+        <>
+        <p style={{color}} >Count:{count}</p>
+        <button onClick={add} >Add</button>
+        <button onClick={changeColor} >Change color</button>
+        </>
+    );
+}
+
+export default UseEffectt;
+
+
+## Example 2
+import React,{useState, useEffect} from 'react'
+
+function WindowResize(){
+   const [width, setWidth] = useState(window.innerWidth);
+   const [height, setHeight] = useState(window.innerHeight);
+   
+   useEffect(()=>{
+    window.addEventListener('resize',handleResize);
+    console.log("EventListener Mounted");
+    return ()=>{
+        window.removeEventListener('resize',handleResize);
+        console.log("EventListener Removed");
+    }
+    },[]);
+
+   function handleResize(){
+   setHeight(window.innerHeight);
+   setWidth(window.innerWidth);
+   }
+
+   useEffect(()=>{document.title=`${height} * ${width}`});
+    return(
+     <>
+     <p>Window width:{width}</p>
+     <p>Window height:{height}</p>
+     </>
+    );
+}
+
+export default WindowResize;
+
+
+##  useContext()   is used to avoid props drilling 
+useContext = React Hook that allows you to share values
+between multiple levels of components
+Wifhout passing props through each level
+
+## PROVIDER COMPONENT
+1. import {createContext} from 'react' ;
+2. export const Mycontext = createContext();
+3.<MyContext.Provider value={value}>
+      <Child/>
+</MyContext. Provider>
+
+## CONSUMER COMPONENTS
+1. import React, { useContext } from 'react' ;
+import { MyContext } from ' ./ComponentA' ;
+2. const value = useContext (MyContext) ;
+
+
+## useRef 
+useState()= Re-renders the component when the state value changes
+"use Reference" Does not cause re-renders when its value changes.
+1. Accessing/ Interacting with DOM  elements
+2. Handling Focus, Animations, and Transitions
+3. Managing Timers and Intervals

@@ -68,7 +68,7 @@ React Project with Typescript
 
  
 
-create-react-app
+create-react-app 
 ================
 -It is a React application boilerplate generator created by Facebook. 
 -This CLI tool installs React,ReactDOM & other libraries required for a react project.
@@ -136,7 +136,7 @@ Let's take an example:
  (It handles Dependency Injection, CSS encapsulation, httpClient, Form validation, routing etc.)
 
 
-	Framework										Library
+	Framework										                 Library
 =========================================================================
 -group of libraries to make your work easier	-performs specific, well-defined operations
 -provides ready to use tools,standards			-provides reusable functions for our code
